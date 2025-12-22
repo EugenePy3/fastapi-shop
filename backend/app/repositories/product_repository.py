@@ -23,7 +23,7 @@ class ProductRepository:
         return (
             self.db.query(Product)
             .options(joinedload(Product.category))
-            .filter(Product.category.id == category_id)
+            .filter(Product.category_id == category_id)
             .all()
         )
 
