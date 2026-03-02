@@ -5,21 +5,21 @@ from ..schemas.category import CategoryCreate
 
 
 class CategoryRepository:
-    def __init__(self, db: Session):
-        self.db = db
+    def __init__(self, session: Session):
+        self.session = session
 
     def get_all(self) -> List[Category]:
-        return self.db.query(Category).all()
+        return self.session.query(Category).all()
 
     def get_by_id(self, category_id: int) -> Optional[Category]:
-        return self.db.query(Category).filter(Category.id == category_id).first()
+        return self.session.query(Category).filter(Category.id == category_id).first()
 
     def get_by_slug(self, slug: str) -> Optional[Category]:
-        return self.db.query(Category).filter(Category.slug == slug).first()
+        return self.session.query(Category).filter(Category.slug == slug).first()
 
     def create(self, category_data: CategoryCreate) -> Category:
         db_category = Category(**category_data.model_dump())
-        self.db.add(db_category)
-        self.db.commit()
-        self.db.refresh(db_category)
+        self.session.add(db_category)
+        self.session.commit()
+        self.session.refresh(db_category)
         return db_category

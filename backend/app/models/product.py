@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Text, Float, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
-from datetime import datetime
+from sqlalchemy import String, Text, DateTime, ForeignKey, func, Numeric
+from decimal import Decimal
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import datetime, timezone
 
 from ..database import Base
 
@@ -8,17 +9,18 @@ from ..database import Base
 class Product(Base):
     __tablename__ = 'products'
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False, index=True)
-    description = Column(Text)
-    price = Column(Float, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
 
-    category_id = Column(Integer, ForeignKey('categories.id'), nullable=False)
+    category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'), nullable=False)
 
-    image_url = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    image_url: Mapped[str | None] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(), default=datetime.utcnow)
 
-    category = relationship('Category', back_populates='products')
+    category: Mapped['Category'] = relationship(back_populates='products')
 
     def __repr__(self):
         return f'<Product(id={self.id}, name={self.name}), price={self.price}>'
+

@@ -46,7 +46,7 @@ class CartService:
 
     def get_cart_details(self, cart_data: Dict[int, int]) -> CartResponse:
         if not cart_data:
-            return CartResponse(items=[], total=0.0, item_count=0)
+            return CartResponse(items=[], total=0.0, items_count=0)
 
         product_ids = list(cart_data.keys())
         products = self.product_repository.get_multiple_by_ids(product_ids)
