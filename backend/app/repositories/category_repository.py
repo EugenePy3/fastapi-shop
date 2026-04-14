@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from ..models.category import Category
+from ..models.product import Product
 from ..schemas.category import CategoryCreate
 
 
@@ -23,3 +24,21 @@ class CategoryRepository:
         self.session.commit()
         self.session.refresh(db_category)
         return db_category
+
+    def update(self, category: Category) -> Category:
+        self.session.commit()
+        self.session.refresh(category)
+        return category
+
+    def count_products_by_category(self, category_id: int) -> int:
+        return (self.session.query(Product)
+                .filter(Product.category_id == category_id)
+                .count()
+                )
+
+    def remove(self, category: Category) -> Category:
+        self.session.delete(category)
+        self.session.flush()
+        self.session.expunge(category)
+        self.session.commit()
+        return category

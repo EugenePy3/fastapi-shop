@@ -23,6 +23,9 @@ class ProductRepository:
             .first()
         )
 
+    def get_by_slug(self, slug: str) -> Optional[Product]:
+        return self.session.query(Product).filter(Product.slug == slug).first()
+
     def get_by_category(self, category_id: int) -> List[Product]:
         return (
             self.session.query(Product)
@@ -45,7 +48,4 @@ class ProductRepository:
             .filter(Product.id.in_(product_ids))
             .all()
         )
-
-
-
 

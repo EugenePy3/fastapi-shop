@@ -10,9 +10,13 @@ class CategoryCreate(CategoryBase):
     pass
 
 
+class CategoryUpdate(BaseModel):
+    name: str = Field(..., min_length=5, max_length=50, description='Updated category name')
+    slug: str = Field(..., min_length=5, max_length=50, description='Display name of the category')
+
+
 class CategoryResponse(CategoryBase):
     id: int = Field(..., description='Unique category identifier')
 
     class Config:
         from_attributes = True
-
