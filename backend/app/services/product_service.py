@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from slugify import slugify
 from typing import List
 from ..repositories.product_repository import ProductRepository
 from ..repositories.category_repository import CategoryRepository
@@ -44,14 +45,15 @@ class ProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f'Category with id {product_data.category_id} not found'
             )
-        existing_product = self.product_repository.get_by_slug(product_data.slug)
-        if existing_product:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f'Product with slug {product_data.slug} already exists'
-            )
+        source_for_slug = product_data.slug or product_data.name
+        base_slug = slugify(source_for_slug, lowercase=True)
+        final_slug = base_slug
+        counter = 1
 
+        while self.product_repository.get_by_slug(final_slug):
+            final_slug = f'{base_slug}-{counter}'
+            counter += 1
+
+        product_data.slug = final_slug
         product = self.product_repository.create(product_data)
         return ProductResponse.model_validate(product)
-
-

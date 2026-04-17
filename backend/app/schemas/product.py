@@ -6,7 +6,7 @@ from .category import CategoryResponse
 
 class ProductBase(BaseModel):
     name: str = Field(..., min_length=5, max_length=200, description="Product name")
-    slug: str | None = Field(min_length=3, max_length=255, description='URL-friendly product slug')
+    slug: str | None = Field(max_length=255, description='URL-friendly product slug')
     description: Optional[str] = Field(None, description='Product description')
     price: float = Field(..., gt=0, description="Product price(must be greater than 0)")
     category_id: int = Field(..., description='Category ID')
@@ -20,6 +20,7 @@ class ProductCreate(ProductBase):
 class ProductResponse(BaseModel):
     id: int = Field(..., description='Unique product identifier')
 
+    slug: str
     name: str
     description: Optional[str]
     price: float
