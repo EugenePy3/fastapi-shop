@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 from slugify import slugify
 from typing import List
+
+from ..models import Product
 from ..repositories.product_repository import ProductRepository
 from ..repositories.category_repository import CategoryRepository
 from ..schemas.product import ProductResponse, ProductListResponse, ProductCreate
@@ -57,3 +59,13 @@ class ProductService:
         product_data.slug = final_slug
         product = self.product_repository.create(product_data)
         return ProductResponse.model_validate(product)
+
+    def remove_product(self, product_id: int) -> Product:
+        product = self.product_repository.get_by_id(product_id)
+        if not product:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'Product with id {product_id} not found'
+            )
+        return self.product_repository.remove(product)
+

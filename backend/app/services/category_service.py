@@ -64,7 +64,7 @@ class CategoryService:
 
         return CategoryResponse.model_validate(category)
 
-    def remove_category(self, category_id: int, ) -> Category:
+    def remove_category(self, category_id: int) -> Category:
         category = self.repository.get_by_id(category_id)
         if not category:
             raise HTTPException(

@@ -20,8 +20,8 @@ class ProductCreate(ProductBase):
 class ProductResponse(BaseModel):
     id: int = Field(..., description='Unique product identifier')
 
-    slug: str
     name: str
+    slug: str
     description: Optional[str]
     price: float
     category_id: int

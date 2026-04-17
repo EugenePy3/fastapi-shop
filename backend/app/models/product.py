@@ -23,5 +23,5 @@ class Product(Base):
     category: Mapped['Category'] = relationship(back_populates='products')
 
     def __repr__(self):
-        return f'<Product(id={self.id}, name={self.name}), price={self.price}>'
+        return f'<Product(id={self.id}, name={self.name}, price={self.price})>'
 

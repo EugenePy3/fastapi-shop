@@ -11,8 +11,8 @@ class ProductRepository:
     def get_all(self) -> List[Product]:
         return (
             self.session.query(Product)
-                .options(joinedload(Product.category))
-                .all()
+            .options(joinedload(Product.category))
+            .all()
         )
 
     def get_by_id(self, product_id: int) -> Optional[Product]:
@@ -49,3 +49,8 @@ class ProductRepository:
             .all()
         )
 
+    def remove(self, product: Product) -> Product:
+        print(f"DEBUG: type is {type(product)}")
+        self.session.delete(product)
+        self.session.commit()
+        return product
