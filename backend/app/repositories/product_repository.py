@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from ..models.product import Product
@@ -41,6 +42,12 @@ class ProductRepository:
         self.session.refresh(session_product)
         return session_product
 
+    def get_slugs_starting_with(self, base_slug: str) -> list[str]:
+        slug = (select(Product.slug)
+                .where(Product.slug.like(f'{base_slug}-%')))
+        result = self.session.execute(slug)
+        return [row[0] for row in result.fetchall()]
+
     def get_multiple_by_ids(self, product_ids: List[int]) -> List[Product]:
         return (
             self.session.query(Product)
@@ -50,7 +57,6 @@ class ProductRepository:
         )
 
     def remove(self, product: Product) -> Product:
-        print(f"DEBUG: type is {type(product)}")
         self.session.delete(product)
         self.session.commit()
         return product
