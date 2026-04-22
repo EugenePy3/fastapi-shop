@@ -44,7 +44,7 @@ class ProductRepository:
 
     def get_slugs_starting_with(self, base_slug: str) -> list[str]:
         slug = (select(Product.slug)
-                .where(Product.slug.like(f'{base_slug}-%')))
+                .where(Product.slug.like(f'{base_slug}%')))
         result = self.session.execute(slug)
         return [row[0] for row in result.fetchall()]
 
