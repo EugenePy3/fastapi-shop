@@ -1,3 +1,4 @@
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from slugify import slugify
 from typing import List
@@ -74,10 +75,21 @@ class ProductService:
         source_for_slug = product_data.slug or product_data.name
         base_slug = slugify(source_for_slug, lowercase=True)
 
-        final_slug = self.slug_service.generate(base_slug)
+        product = None
 
-        product_data.slug = final_slug
-        product = self.product_repository.create(product_data)
+        for retry_slug in range(3):
+            try:
+                final_slug = self.slug_service.generate(base_slug)
+                product_data.slug = final_slug
+                product = self.product_repository.create(product_data)
+                break
+
+            except IntegrityError:
+                self.product_repository.session.rollback()
+
+                if retry_slug == 2:
+                    raise
+
         return ProductResponse.model_validate(product)
 
     def remove_product(self, product_id: int) -> Product:
