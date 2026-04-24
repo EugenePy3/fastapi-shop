@@ -42,11 +42,11 @@ class ProductRepository:
         self.session.refresh(session_product)
         return session_product
 
-    def get_slugs_starting_with(self, base_slug: str) -> list[str]:
-        slug = (select(Product.slug)
-                .where(Product.slug.like(f'{base_slug}%')))
-        result = self.session.execute(slug)
-        return [row[0] for row in result.fetchall()]
+    def update(self, product: Product) -> Product:
+        self.session.add(product)
+        self.session.commit()
+        self.session.refresh(product)
+        return product
 
     def get_multiple_by_ids(self, product_ids: List[int]) -> List[Product]:
         return (
