@@ -5,7 +5,7 @@ from ..database import get_db
 from ..dependencies import require_admin
 from ..models.user import User
 from ..services.product_service import ProductService
-from ..schemas.product import ProductResponse, ProductListResponse, ProductCreate
+from ..schemas.product import ProductResponse, ProductListResponse, ProductCreate, ProductUpdate
 
 router = APIRouter(
     prefix='/api/products',
@@ -38,10 +38,15 @@ def create_product(product_data: ProductCreate, admin: User = Depends(require_ad
     return service.create_product(product_data)
 
 
+@router.patch('/{product_id}', response_model=ProductResponse, status_code=status.HTTP_200_OK)
+def update_product(product_id: int, update_data: ProductUpdate, admin: User = Depends(require_admin),
+                   db: Session = Depends(get_db)):
+    service = ProductService(db)
+    return service.update_product(product_id, update_data)
+
+
 @router.delete('/{product_id}', response_model=ProductResponse, status_code=status.HTTP_200_OK)
 def remove_product(product_id: int, admin: User = Depends(require_admin),
                    db: Session = Depends(get_db)):
     service = ProductService(db)
     return service.remove_product(product_id)
-
-

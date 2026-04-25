@@ -43,7 +43,7 @@ class CategoryService:
         category = self.repository.create(category_data)
         return CategoryResponse.model_validate(category)
 
-    def update_category(self, category_id: int, category_data: CategoryUpdate) -> CategoryResponse:
+    def update_category(self, category_id: int, update_data: CategoryUpdate) -> CategoryResponse:
         category = self.repository.get_by_id(category_id)
         if not category:
             raise HTTPException(
@@ -51,14 +51,14 @@ class CategoryService:
                 detail=f'Category with id {category_id} not found'
             )
 
-        existing_category = self.repository.get_by_slug(category_data.slug)
+        existing_category = self.repository.get_by_slug(update_data.slug)
         if existing_category and existing_category.id != category_id:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f'Category with slug {category_data.slug} already exists'
+                detail=f'Category with slug {update_data.slug} already exists'
             )
-        category.name = category_data.name
-        category.slug = category_data.slug
+        category.name = update_data.name
+        category.slug = update_data.slug
 
         category = self.repository.update(category)
 

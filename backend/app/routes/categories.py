@@ -33,10 +33,10 @@ def create_category(category_data: CategoryCreate, admin: User = Depends(require
 
 
 @router.put('/{category_id}', response_model=CategoryResponse, status_code=status.HTTP_200_OK)
-def update_category(category_id: int, category_data: CategoryUpdate, admin: User = Depends(require_admin),
+def update_category(category_id: int, update_data: CategoryUpdate, admin: User = Depends(require_admin),
                     db: Session = Depends(get_db)):
     service = CategoryService(db)
-    return service.update_category(category_id, category_data)
+    return service.update_category(category_id, update_data)
 
 
 @router.delete('/{category_id}', status_code=status.HTTP_200_OK)
