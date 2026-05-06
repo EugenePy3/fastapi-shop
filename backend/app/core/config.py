@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     debug: bool = True
 
     database_url: str = Field(
-        default="sqlite:///./shop.db",
+        default="postgresql://user:password@localhost:5432/shop",
         alias="DATABASE_URL",
     )
 

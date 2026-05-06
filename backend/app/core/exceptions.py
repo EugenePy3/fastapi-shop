@@ -18,9 +18,14 @@ class UserNotFoundError(AppError):
     """Пользователь не найден."""
 
 
-class RefreshTokenNotFoundError(AppError):
-    """Рефреш токен не найден или отозван."""
+# SHOP
+class CategoryNotFoundError(AppError):
+    """Category not found"""
 
 
-class RefreshTokenExpiredError(AppError):
-    """Рефреш токен истёк."""
+class CategoryAlreadyExistsError(AppError):
+    """Category already exists"""
+
+
+class CategoryDeleteError(AppError):
+    """"""
