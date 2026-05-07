@@ -28,4 +28,4 @@ class CategoryAlreadyExistsError(AppError):
 
 
 class CategoryDeleteError(AppError):
-    """"""
+    """Category cannot be deleted"""
