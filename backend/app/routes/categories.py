@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from ..database import get_db
@@ -6,6 +6,7 @@ from ..dependencies import require_admin
 from ..models.user import User
 from ..services.category_service import CategoryService, CategoryUpdate
 from ..schemas.category import CategoryResponse, CategoryCreate
+from app.core.exceptions import CategoryNotFoundError, CategoryAlreadyExistsError, CategoryDeleteError
 
 router = APIRouter(
     prefix='/api/categories',
@@ -22,7 +23,11 @@ def get_categories(db: Session = Depends(get_db)):
 @router.get('/{category_id}', response_model=CategoryResponse, status_code=status.HTTP_200_OK)
 def get_category(category_id: int, db: Session = Depends(get_db)):
     service = CategoryService(db)
-    return service.get_category_by_id(category_id)
+    try:
+        return service.get_category_by_id(category_id)
+    except CategoryNotFoundError as err:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Category with id {category_id} not found') from err
 
 
 @router.post('', response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
@@ -44,3 +49,5 @@ def remove_category(category_id: int, admin: User = Depends(require_admin),
                     db: Session = Depends(get_db)):
     service = CategoryService(db)
     return service.remove_category(category_id)
+
+
