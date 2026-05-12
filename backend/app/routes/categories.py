@@ -23,11 +23,7 @@ def get_categories(db: Session = Depends(get_db)):
 @router.get('/{category_id}', response_model=CategoryResponse, status_code=status.HTTP_200_OK)
 def get_category(category_id: int, db: Session = Depends(get_db)):
     service = CategoryService(db)
-    try:
-        return service.get_category_by_id(category_id)
-    except CategoryNotFoundError as err:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'Category with id {category_id} not found') from err
+    return service.get_category_by_id(category_id)
 
 
 @router.post('', response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
