@@ -1,11 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, Request, Response
 
 from app.core.config import settings
 from app.dependencies import DBManagerDep, get_current_user_from_session
-from app.core.exceptions import (
-    AppError,
-    InvalidCredentialsError,
-)
 from app.models.user import User
 from app.schemas.user import LoginRequest, SessionLoginResponse, UserRead
 from app.services.auth_service import AuthServiceSession
@@ -17,7 +13,7 @@ def _set_session_cookie(response: Response, token: str) -> None:
     response.set_cookie(
         key=settings.session_cookie_name,
         value=token,
-        httponly=False,
+        httponly=True,
         secure=settings.session_cookie_secure,
         samesite="lax",
         max_age=settings.session_ttl_minutes * 60,
@@ -44,12 +40,7 @@ def login_with_session(
         data: LoginRequest, response: Response, db: DBManagerDep
 ) -> SessionLoginResponse:
     session_service = AuthServiceSession(db)
-    try:
-        user, raw_token = session_service.login(data.name, data.password)
-    except InvalidCredentialsError as err:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail=str(err)) from err
-    except AppError as err:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    user, raw_token = session_service.login(data.name, data.password)
     _set_session_cookie(response, raw_token)
     return SessionLoginResponse(user=user)
 
@@ -58,10 +49,7 @@ def login_with_session(
 def logout_session(request: Request, response: Response, db: DBManagerDep) -> dict:
     session_service = AuthServiceSession(db)
     raw_token = request.cookies.get(settings.session_cookie_name)
-    try:
-        session_service.logout(raw_token)
-    except AppError as err:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    session_service.logout(raw_token)
     _clear_session_cookie(response)
     return {"detail": "Logged out"}
 

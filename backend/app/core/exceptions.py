@@ -7,11 +7,12 @@ class RepositoryNotInitializedError(AppError):
 
 
 class InvalidCredentialsError(AppError):
-    """Неверная пара логин/пароль."""
+    """Invalid username or password.
+    Неверная пара логин/пароль."""
 
 
 class UserAlreadyExistsError(AppError):
-    """Пользователь уже существует."""
+    """User alredy exists."""
 
 
 class UserNotFoundError(AppError):
@@ -20,16 +21,20 @@ class UserNotFoundError(AppError):
 
 # SHOP
 class CategoryNotFoundError(AppError):
-    """Category not found"""
+    """Category not found."""
 
 
 class CategoryAlreadyExistsError(AppError):
-    """Category already exists"""
+    """Category already exists."""
 
 
 class CategoryDeleteError(AppError):
-    """Category cannot be deleted"""
+    """Category cannot be deleted."""
 
 
 class ProductNotFoundError(AppError):
-    """Product not found"""
+    """Product not found."""
+
+
+class CartItemNotFoundError(AppError):
+    """Cart Item not found."""

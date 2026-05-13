@@ -6,18 +6,24 @@ from .database import init_db
 from .routes import products_router, categories_router, cart_router, auth_router, session_router
 
 from app.core.handlers import (
+    user_already_exists_handler,
+    invalid_credentials_handler,
     category_not_found_handler,
     category_already_exists_handler,
     category_delete_error_handler,
-    product_not_found_handler
+    product_not_found_handler,
+    cart_item_not_found_handler
 )
 
 
 from app.core.exceptions import (
+    UserAlreadyExistsError,
+    InvalidCredentialsError,
     CategoryNotFoundError,
     CategoryAlreadyExistsError,
     CategoryDeleteError,
-    ProductNotFoundError
+    ProductNotFoundError,
+    CartItemNotFoundError
 )
 
 app = FastAPI(
@@ -36,6 +42,16 @@ app.add_middleware(
 )
 
 app.add_exception_handler(
+    UserAlreadyExistsError,
+    user_already_exists_handler
+)
+
+app.add_exception_handler(
+    InvalidCredentialsError,
+    invalid_credentials_handler
+)
+
+app.add_exception_handler(
     CategoryNotFoundError,
     category_not_found_handler
 )
@@ -51,6 +67,11 @@ app.add_exception_handler(
 app.add_exception_handler(
     ProductNotFoundError,
     product_not_found_handler
+)
+
+app.add_exception_handler(
+    CartItemNotFoundError,
+    cart_item_not_found_handler
 )
 
 app.mount('/static', StaticFiles(directory=settings.static_dir), name='static')

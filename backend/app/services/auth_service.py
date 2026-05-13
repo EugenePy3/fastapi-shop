@@ -18,7 +18,7 @@ class UserService:
     def register(self, name: str, password: str):
         existing = self.db.users.get_user_by_name(name)
         if existing:
-            raise UserAlreadyExistsError
+            raise UserAlreadyExistsError('User already exists')
 
         user = self.db.users.create_user(
             name=name,
@@ -36,7 +36,7 @@ class AuthServiceSession:
     def login(self, name: str, password: str):
         user = self.db.users.get_user_by_name(name)
         if not user or not security.verify_password(password, user.password_hash):
-            raise InvalidCredentialsError
+            raise InvalidCredentialsError('Invalid username or password')
 
         raw_token, token_hash = tokens.generate_session_token()
         now = datetime.now(timezone.utc)
