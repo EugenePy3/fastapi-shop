@@ -7,6 +7,10 @@ from app.core.exceptions import (
     CategoryDeleteError
 )
 
+from app.core.exceptions import (
+    ProductNotFoundError
+)
+
 
 def category_not_found_handler(request: Request, exc: CategoryNotFoundError):
     return JSONResponse(
@@ -25,6 +29,13 @@ def category_already_exists_handler(request: Request, exc: CategoryAlreadyExists
 def category_delete_error_handler(request: Request, exc: CategoryDeleteError):
     return JSONResponse(
         status_code=409,
+        content={'detail': str(exc)}
+    )
+
+
+def product_not_found_handler(request: Request, exc: ProductNotFoundError):
+    return JSONResponse(
+        status_code=404,
         content={'detail': str(exc)}
     )
 

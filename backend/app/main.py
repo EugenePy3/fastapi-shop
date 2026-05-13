@@ -8,15 +8,17 @@ from .routes import products_router, categories_router, cart_router, auth_router
 from app.core.handlers import (
     category_not_found_handler,
     category_already_exists_handler,
-    category_delete_error_handler
+    category_delete_error_handler,
+    product_not_found_handler
 )
+
 
 from app.core.exceptions import (
     CategoryNotFoundError,
     CategoryAlreadyExistsError,
-    CategoryDeleteError
+    CategoryDeleteError,
+    ProductNotFoundError
 )
-
 
 app = FastAPI(
     title=settings.app_name,
@@ -44,6 +46,11 @@ app.add_exception_handler(
 app.add_exception_handler(
     CategoryDeleteError,
     category_delete_error_handler
+)
+
+app.add_exception_handler(
+    ProductNotFoundError,
+    product_not_found_handler
 )
 
 app.mount('/static', StaticFiles(directory=settings.static_dir), name='static')

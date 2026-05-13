@@ -29,3 +29,7 @@ class CategoryAlreadyExistsError(AppError):
 
 class CategoryDeleteError(AppError):
     """Category cannot be deleted"""
+
+
+class ProductNotFoundError(AppError):
+    """Product not found"""

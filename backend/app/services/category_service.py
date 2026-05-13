@@ -5,7 +5,6 @@ from ..core.exceptions import CategoryNotFoundError, CategoryDeleteError, Catego
 from ..models import Category
 from ..repositories.category_repository import CategoryRepository
 from ..schemas.category import CategoryResponse, CategoryCreate, CategoryUpdate
-from fastapi import HTTPException, status
 
 
 class CategoryService:
