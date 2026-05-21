@@ -9,7 +9,7 @@ from ..database import Base
 
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(255), unique=True, index=True)
@@ -17,18 +17,19 @@ class User(Base):
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(), default=datetime.utcnow)
 
-    sessions: Mapped[list["UserSession"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    cart_items: Mapped[list['CartItem']] = relationship(back_populates='user', cascade='all, delete-orphan')
+    sessions: Mapped[list['UserSession']] = relationship(back_populates='user', cascade='all, delete-orphan')
 
 
 class UserSession(Base):
-    __tablename__ = "sessions"
+    __tablename__ = 'sessions'
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), index=True)
     token_hash: Mapped[str] = mapped_column(String(128), unique=True)
 
     expires_at: Mapped[datetime] = mapped_column(DateTime(), index=True)
     last_refreshed_at: Mapped[datetime] = mapped_column(DateTime(), default=datetime.utcnow)
     created_at: Mapped[datetime] = mapped_column(DateTime(), default=datetime.utcnow)
 
-    user: Mapped[User] = relationship(back_populates="sessions")
+    user: Mapped[User] = relationship(back_populates='sessions')

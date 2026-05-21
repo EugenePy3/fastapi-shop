@@ -1,5 +1,5 @@
 class AppError(Exception):
-    """Базовая ошибка приложения."""
+    """Basic application error."""
 
 
 class RepositoryNotInitializedError(AppError):
