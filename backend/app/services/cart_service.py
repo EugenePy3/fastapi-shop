@@ -1,65 +1,93 @@
 from sqlalchemy.orm import Session
-from typing import Dict
 from ..repositories.product_repository import ProductRepository
+from ..repositories.cart_repository import CartRepository
 from ..schemas.cart import CartResponse, CartItem, CartItemCreate, CartItemUpdate
 from ..core.exceptions import ProductNotFoundError, CartItemNotFoundError
 
 
 class CartService:
     def __init__(self, db: Session):
+        self.db = db
         self.product_repository = ProductRepository(db)
+        self.cart_repository = CartRepository(db)
 
-    def add_to_cart(self, cart_data: Dict[int, int], item: CartItemCreate) -> Dict[int, int]:
+    def add_to_cart(self, user_id: int, item: CartItemCreate) -> CartItem:
         product = self.product_repository.get_by_id(item.product_id)
         if not product:
             raise ProductNotFoundError(f'Product with id {item.product_id} not found')
 
-        if item.product_id in cart_data:
-            cart_data[item.product_id] += item.quantity
-        else:
-            cart_data[item.product_id] = item.quantity
+        existing_item = self.cart_repository.get_cart_item(
+            user_id=user_id,
+            product_id=item.product_id
+        )
+        if existing_item:
+            existing_item.quantity += item.quantity
+            return existing_item
 
-        return cart_data
+        cart_item = self.cart_repository.create_cart_item(
+            user_id=user_id,
+            product_id=item.product_id,
+            quantity=item.quantity,
+        )
+        self.db.commit()
+        return cart_item
 
-    def update_cart_item(self, cart_data: Dict[int, int], item: CartItemUpdate) -> Dict[int, int]:
-        if item.product_id not in cart_data:
-            raise CartItemNotFoundError('Product with id {item.product_id} not found in cart')
+    def update_cart_item(self, user_id: int, item: CartItemUpdate) -> CartItem:
+        cart_item = self.cart_repository.get_cart_item(
+            user_id=user_id,
+            product_id=item.product_id,
+        )
 
-        cart_data[item.product_id] = item.quantity
-        return cart_data
+        if not cart_item:
+            raise CartItemNotFoundError(f'Product with id {item.product_id} not found in cart')
 
-    def remove_from_cart(self, cart_data: Dict[int, int], product_id: int) -> Dict[int, int]:
-        if product_id not in cart_data:
+        update_item = self.cart_repository.update_cart_item(
+            cart_item=cart_item,
+            quantity=cart_item.quantity,
+        )
+        self.db.commit()
+        return update_item
+
+    def remove_from_cart(self, user_id: int, product_id: int) -> None:
+        cart_item = self.cart_repository.get_cart_item(
+            user_id=user_id,
+            product_id=product_id
+        )
+        if not cart_item:
             raise CartItemNotFoundError(f'Product with id {product_id} not found in cart')
 
-        del cart_data[product_id]
-        return cart_data
+        self.cart_repository.delete_cart_item(cart_item)
 
-    def get_cart_details(self, cart_data: Dict[int, int]) -> CartResponse:
-        if not cart_data:
-            return CartResponse(items=[], total=0.0, items_count=0)
+    def get_cart_details(self, user_id: int, item: CartItem) -> CartResponse:
+        cart_items = self.cart_repository.get_user_cart(user_id)
 
-        product_ids = list(cart_data.keys())
-        products = self.product_repository.get_multiple_by_ids(product_ids)
-        products_dict = {product.id: product for product in products}
+        if not cart_items:
+            return CartResponse(
+                items=[],
+                total=0.0,
+                items_count=0)
 
-        cart_items = []
+        response_items = []
+
         total_price = 0.0
         total_items = 0
 
-        for product_id, quantity in cart_data.items():
-            if product_id in products_dict:
-                product = products_dict[product_id]
-                subtotal = product.price * quantity
+        subtotal = item.product.price * item.quantity
 
-                cart_item = CartItem(product_id=product_id, name=product.name,
-                                     price=product.price, quantity=quantity,
-                                     subtotal=subtotal, image_url=product.image_url)
+        response_item = CartItem(
+            product_id=item.product_id,
+            name=item.product.name,
+            price=item.product.price,
+            quantity=item.quantity,
+            subtotal=item.subtotal,
+            image_url=item.product.image_url
+        )
 
-                cart_items.append(cart_item)
-                total_price += subtotal
-                total_items += quantity
+        response_items.append(response_item)
 
-        return CartResponse(items=cart_items, total=round(total_price),
+        total_price += subtotal
+        total_items += item.quantity
+
+        return CartResponse(items=response_items, total=round(total_price, 2),
                             items_count=total_items)
 
