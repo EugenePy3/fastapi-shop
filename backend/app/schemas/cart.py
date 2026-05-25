@@ -16,7 +16,7 @@ class CartItemUpdate(BaseModel):
     quantity: int = Field(..., gt=0, description='New quantity (must be greater than 0)')
 
 
-class CartItem(BaseModel):
+class CartItemResponse(BaseModel):
     product_id: int
     name: str = Field(..., description='Product name')
     price: float = Field(..., description='Product price')
@@ -26,6 +26,6 @@ class CartItem(BaseModel):
 
 
 class CartResponse(BaseModel):
-    items: list[CartItem] = Field(..., description='List of item in cart')
+    items: list[CartItemResponse] = Field(..., description='List of item in cart')
     total: float = Field(..., description='Total cart price')
     items_count: int = Field(..., description='Total number of items in cart')

@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
 from app.repositories.user_repository import AuthRepository, UserRepository
+from app.repositories.category_repository import CategoryRepository
+from app.repositories.product_repository import ProductRepository
+from app.repositories.cart_repository import CartRepository
 
 
 class DBManager:
@@ -24,8 +27,6 @@ class DBManager:
 
         if exc_type:
             self.session.rollback()
-        else:
-            self.session.commit()
 
         self.session.close()
 

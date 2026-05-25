@@ -6,7 +6,6 @@ from ..dependencies import require_admin
 from ..models.user import User
 from ..services.category_service import CategoryService, CategoryUpdate
 from ..schemas.category import CategoryResponse, CategoryCreate
-from app.core.exceptions import CategoryNotFoundError, CategoryAlreadyExistsError, CategoryDeleteError
 
 router = APIRouter(
     prefix='/api/categories',
