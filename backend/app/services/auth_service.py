@@ -25,7 +25,6 @@ class UserService:
             password_hash=security.hash_password(password),
         )
 
-        self.db.session.commit()
         return user
 
 
@@ -46,7 +45,7 @@ class AuthServiceSession:
             now + timedelta(minutes=settings.session_extend_minutes),
         )
         self.db.auth.create_session(user_id=user.id, token_hash=token_hash, expires_at=expires_at)
-        self.db.session.commit()
+
         return user, raw_token
 
     def logout(self, raw_token: str | None) -> None:
@@ -56,5 +55,5 @@ class AuthServiceSession:
         stored = self.db.auth.get_session_by_hash(token_hash)
         if stored:
             self.db.auth.delete_session(stored)
-            self.db.session.commit()
+
 

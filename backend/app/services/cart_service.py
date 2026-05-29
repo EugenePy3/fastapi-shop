@@ -1,42 +1,38 @@
 from decimal import Decimal
 
-from sqlalchemy.orm import Session
-from ..repositories.product_repository import ProductRepository
-from ..repositories.cart_repository import CartRepository
+from ..core.db_manager import DBManager
 from ..schemas.cart import CartResponse, CartItemResponse, CartItemCreate, CartItemUpdate
 from ..core.exceptions import ProductNotFoundError, CartItemNotFoundError
 
 
 class CartService:
-    def __init__(self, db: Session):
+    def __init__(self, db: DBManager):
         self.db = db
-        self.product_repository = ProductRepository(db)
-        self.cart_repository = CartRepository(db)
+        self.products = db.products
+        self.carts = db.carts
 
     def add_to_cart(self, user_id: int, item: CartItemCreate) -> CartItemResponse:
-        product = self.product_repository.get_by_id(item.product_id)
+        product = self.products.get_by_id(item.product_id)
         if not product:
             raise ProductNotFoundError(f'Product with id {item.product_id} not found')
 
-        existing_item = self.cart_repository.get_cart_item(
+        existing_item = self.carts.get_cart_item(
             user_id=user_id,
             product_id=item.product_id
         )
         if existing_item:
             existing_item.quantity += item.quantity
-            self.db.commit()
             return existing_item
 
-        cart_item = self.cart_repository.create_cart_item(
+        cart_item = self.carts.create_cart_item(
             user_id=user_id,
             product_id=item.product_id,
             quantity=item.quantity,
         )
-        self.db.commit()
         return cart_item
 
     def update_cart_item(self, user_id: int, item: CartItemUpdate) -> CartItemResponse:
-        cart_item = self.cart_repository.get_cart_item(
+        cart_item = self.carts.get_cart_item(
             user_id=user_id,
             product_id=item.product_id,
         )
@@ -44,26 +40,24 @@ class CartService:
         if not cart_item:
             raise CartItemNotFoundError(f'Product with id {item.product_id} not found in cart')
 
-        update_item = self.cart_repository.update_cart_item(
+        update_item = self.carts.update_cart_item(
             cart_item=cart_item,
             quantity=item.quantity,
         )
-        self.db.commit()
         return update_item
 
     def remove_from_cart(self, user_id: int, product_id: int) -> None:
-        cart_item = self.cart_repository.get_cart_item(
+        cart_item = self.carts.get_cart_item(
             user_id=user_id,
             product_id=product_id
         )
         if not cart_item:
             raise CartItemNotFoundError(f'Product with id {product_id} not found in cart')
 
-        self.cart_repository.delete_cart_item(cart_item)
-        self.db.commit()
+        self.carts.delete_cart_item(cart_item)
 
     def get_cart_details(self, user_id: int) -> CartResponse:
-        cart_items = self.cart_repository.get_user_cart(user_id)
+        cart_items = self.carts.get_user_cart(user_id)
 
         if not cart_items:
             return CartResponse(

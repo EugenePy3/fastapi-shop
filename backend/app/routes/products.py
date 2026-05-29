@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from typing import List
 from ..database import get_db
-from ..dependencies import require_admin
+from ..dependencies import require_admin, DBManagerDep
 from ..models.user import User
 from ..services.product_service import ProductService
 from ..schemas.product import ProductResponse, ProductListResponse, ProductCreate, ProductUpdate
@@ -14,7 +14,7 @@ router = APIRouter(
 
 
 @router.get('', response_model=ProductListResponse, status_code=status.HTTP_200_OK)
-def get_products(db: Session = Depends(get_db)):
+def get_products(db: DBManagerDep):
     service = ProductService(db)
     return service.get_all_products()
 

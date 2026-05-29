@@ -10,53 +10,63 @@ class ProductRepository:
         self.session = session
 
     def get_all(self) -> List[Product]:
-        return (
-            self.session.query(Product)
+        stmt = (
+            select(Product)
             .options(joinedload(Product.category))
-            .all()
         )
+
+        return self.session.execute(stmt).scalars().all()
 
     def get_by_id(self, product_id: int) -> Optional[Product]:
-        return (
-            self.session.query(Product)
+        stmt = (
+            select(Product)
             .options(joinedload(Product.category))
-            .filter(Product.id == product_id)
-            .first()
+            .where(Product.id == product_id)
         )
+
+        return self.session.execute(stmt).scalar_one_or_none()
 
     def get_by_slug(self, slug: str) -> Optional[Product]:
-        return self.session.query(Product).filter(Product.slug == slug).first()
+        stmt = select(Product).where(Product.slug == slug)
+
+        return self.session.execute(stmt).scalar_one_or_none()
 
     def get_by_category(self, category_id: int) -> List[Product]:
-        return (
-            self.session.query(Product)
+        stmt = (
+            select(Product)
             .options(joinedload(Product.category))
-            .filter(Product.category_id == category_id)
-            .all()
+            .where(Product.category_id == category_id)
         )
 
+        return self.session.execute(stmt).scalars().all()
+
     def create(self, product_data: ProductCreate) -> Product:
-        session_product = Product(**product_data.model_dump())
-        self.session.add(session_product)
-        self.session.commit()
-        self.session.refresh(session_product)
-        return session_product
+        product = Product(**product_data.model_dump())
+
+        self.session.add(product)
+        self.session.flush()
+        self.session.refresh(product)
+
+        return product
 
     def update(self, product: Product) -> Product:
         self.session.add(product)
-        self.session.commit()
+        self.session.flush()
         self.session.refresh(product)
+
         return product
 
     def get_multiple_by_ids(self, product_ids: List[int]) -> List[Product]:
-        return (
-            self.session.query(Product)
+        stmt = (
+            select(Product)
             .options(joinedload(Product.category))
-            .filter(Product.id.in_(product_ids))
-            .all()
+            .where(Product.id.in_(product_ids))
         )
+
+        return self.session.execute(stmt).scalars().all()
 
     def remove(self, product: Product) -> Product:
         self.session.delete(product)
-        self.session.commit()
+        self.session.flush()
+
         return product

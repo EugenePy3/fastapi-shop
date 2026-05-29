@@ -12,24 +12,34 @@ class DBManager:
     def __init__(self, session_factory: Callable[[], Session] = SessionLocal):
         self.session_factory = session_factory
         self.session: Session | None = None
+
         self.users: UserRepository | None = None
         self.auth: AuthRepository | None = None
+        self.categories: CategoryRepository | None = None
+        self.products: ProductRepository | None = None
+        self.carts: CartRepository | None = None
 
     def __enter__(self) -> "DBManager":
         self.session = self.session_factory()
+
         self.users = UserRepository(self.session)
         self.auth = AuthRepository(self.session)
+        self.categories = CategoryRepository(self.session)
+        self.products = ProductRepository(self.session)
+        self.carts = CartRepository(self.session)
+
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         if not self.session:
             return
 
-        if exc_type:
-            self.session.rollback()
+        try:
+            if exc_type:
+                self.session.rollback()
+            else:
+                self.session.commit()
+        finally:
+            self.session.close()
 
-        self.session.close()
 
-    def commit(self) -> None:
-        if self.session:
-            self.session.commit()

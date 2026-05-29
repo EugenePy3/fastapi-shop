@@ -1,5 +1,7 @@
+from typing import List
+
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from sqlalchemy import select, delete, func
 from ..models.category import Category
 from ..models.product import Product
 from ..schemas.category import CategoryCreate
@@ -10,35 +12,42 @@ class CategoryRepository:
         self.session = session
 
     def get_all(self) -> List[Category]:
-        return self.session.query(Category).all()
+        stmt = select(Category)
+        return list(self.session.scalars(stmt))
 
-    def get_by_id(self, category_id: int) -> Optional[Category]:
-        return self.session.query(Category).filter(Category.id == category_id).first()
+    def get_by_id(self, category_id: int) -> Category | None:
+        stmt = (
+            select(Category)
+            .where(Category.id == category_id)
+        )
+        return self.session.scalar(stmt)
 
-    def get_by_slug(self, slug: str) -> Optional[Category]:
-        return self.session.query(Category).filter(Category.slug == slug).first()
+    def get_by_slug(self, slug: str) -> Category | None:
+        stmt = (
+            select(Category)
+            .where(Category.slug == slug)
+        )
+        return self.session.scalar(stmt)
 
     def create(self, category_data: CategoryCreate) -> Category:
-        db_category = Category(**category_data.model_dump())
-        self.session.add(db_category)
-        self.session.commit()
-        self.session.refresh(db_category)
-        return db_category
+        category = Category(**category_data.model_dump())
+        self.session.add(category)
+        self.session.flush()
+        self.session.refresh(category)
+        return category
 
     def update(self, category: Category) -> Category:
-        self.session.commit()
+        self.session.flush()
         self.session.refresh(category)
         return category
 
     def count_products_by_category(self, category_id: int) -> int:
-        return (self.session.query(Product)
-                .filter(Product.category_id == category_id)
-                .count()
-                )
+        stmt = (
+            select(func.count(Product.id))
+            .where(Product.category_id == category_id)
+            )
+        return self.session.scalar(stmt)
 
     def remove(self, category: Category) -> Category:
         self.session.delete(category)
-        self.session.flush()
-        self.session.expunge(category)
-        self.session.commit()
         return category
