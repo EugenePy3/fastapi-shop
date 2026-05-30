@@ -20,33 +20,43 @@ def get_products(db: DBManagerDep):
 
 
 @router.get('/{product_id}', response_model=ProductResponse, status_code=status.HTTP_200_OK)
-def get_product(product_id: int, db: Session = Depends(get_db)):
+def get_product(product_id: int, db: DBManagerDep):
     service = ProductService(db)
     return service.get_product_by_id(product_id)
 
 
 @router.get('/category/{category_id}', response_model=ProductListResponse, status_code=status.HTTP_200_OK)
-def get_products_by_category(category_id: int, db: Session = Depends(get_db)):
+def get_products_by_category(category_id: int, db: DBManagerDep):
     service = ProductService(db)
     return service.get_products_by_category(category_id)
 
 
 @router.post('', response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
-def create_product(product_data: ProductCreate, admin: User = Depends(require_admin),
-                   db: Session = Depends(get_db)):
+def create_product(
+        product_data: ProductCreate,
+        db: DBManagerDep,
+        admin: User = Depends(require_admin)
+):
     service = ProductService(db)
     return service.create_product(product_data)
 
 
 @router.patch('/{product_id}', response_model=ProductResponse, status_code=status.HTTP_200_OK)
-def update_product(product_id: int, update_data: ProductUpdate, admin: User = Depends(require_admin),
-                   db: Session = Depends(get_db)):
+def update_product(
+        product_id: int,
+        update_data: ProductUpdate,
+        db: DBManagerDep,
+        admin: User = Depends(require_admin)
+):
     service = ProductService(db)
     return service.update_product(product_id, update_data)
 
 
 @router.delete('/{product_id}', response_model=ProductResponse, status_code=status.HTTP_200_OK)
-def remove_product(product_id: int, admin: User = Depends(require_admin),
-                   db: Session = Depends(get_db)):
+def remove_product(
+        product_id: int,
+        db: DBManagerDep,
+        admin: User = Depends(require_admin)
+):
     service = ProductService(db)
     return service.remove_product(product_id)

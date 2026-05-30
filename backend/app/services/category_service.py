@@ -53,13 +53,13 @@ class CategoryService:
         return CategoryResponse.model_validate(category)
 
     def remove_category(self, category_id: int) -> Category:
-        category = self.repository.get_by_id(category_id)
+        category = self.categories.get_by_id(category_id)
         if not category:
             raise CategoryNotFoundError(f'Category with id {category_id} not found')
-        product_count = self.repository.count_products_by_category(category_id)
+        product_count = self.categories.count_products_by_category(category_id)
         if product_count > 0:
             raise CategoryDeleteError(f'Cannot delete category: {product_count} products are still assigned to it')
-        self.db.commit()
-        return self.repository.remove(category)
+
+        return self.categories.remove(category)
 
 

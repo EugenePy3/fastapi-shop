@@ -17,7 +17,7 @@ class User(Base):
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(), default=datetime.utcnow)
 
-    cart_items: Mapped[list['CartItem']] = relationship(back_populates='user', cascade='all, delete-orphan')
+    cart_items: Mapped['Cart'] = relationship(back_populates='user')
     sessions: Mapped[list['UserSession']] = relationship(back_populates='user', cascade='all, delete-orphan')
 
 
