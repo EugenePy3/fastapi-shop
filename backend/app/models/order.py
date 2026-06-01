@@ -2,6 +2,7 @@ from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from ..database import Base
+from ..enums.order_status import OrderStatus
 
 
 class Order(Base):
@@ -13,7 +14,9 @@ class Order(Base):
         ForeignKey('users.id')
     )
 
-    status: Mapped[str] = mapped_column(default='pending')
+    status: Mapped[OrderStatus] = mapped_column(
+        default=OrderStatus.PENDING
+    )
     total_amount: Mapped[float]
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
