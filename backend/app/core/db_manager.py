@@ -6,6 +6,7 @@ from app.repositories.user_repository import AuthRepository, UserRepository
 from app.repositories.category_repository import CategoryRepository
 from app.repositories.product_repository import ProductRepository
 from app.repositories.cart_repository import CartRepository
+from app.repositories.order_repository import OrderRepository
 
 
 class DBManager:
@@ -18,6 +19,7 @@ class DBManager:
         self.categories: CategoryRepository | None = None
         self.products: ProductRepository | None = None
         self.carts: CartRepository | None = None
+        self.orders: OrderRepository | None = None
 
     def __enter__(self) -> "DBManager":
         self.session = self.session_factory()
@@ -27,6 +29,7 @@ class DBManager:
         self.categories = CategoryRepository(self.session)
         self.products = ProductRepository(self.session)
         self.carts = CartRepository(self.session)
+        self.orders = OrderRepository(self.session)
 
         return self
 

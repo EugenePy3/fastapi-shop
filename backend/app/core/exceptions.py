@@ -36,5 +36,17 @@ class ProductNotFoundError(AppError):
     """Product not found."""
 
 
+class CartNotFoundError(AppError):
+    """Cart not found."""
+
+
 class CartItemNotFoundError(AppError):
-    """Cart Item not found."""
+    """Cart item not found."""
+
+
+class EmptyCartError(AppError):
+    """Cart is empty."""
+
+
+class OrderNotFoundError(AppError):
+    """Order not found."""

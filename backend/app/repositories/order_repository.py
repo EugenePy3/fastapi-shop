@@ -1,13 +1,14 @@
-from sqlalchemy import select, delete
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 from ..models.order import Order, OrderItem
 
 
 class OrderRepository:
-    def __init__(self, session: Session):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
-    def get_by_id(self, order_id: int) -> Order | None:
+    async def get_by_id(self, order_id: int) -> Order | None:
         stmt = (
             select(Order)
             .where(Order.id == order_id)
@@ -15,9 +16,9 @@ class OrderRepository:
                 joinedload(Order.items)
             )
         )
-        return self.session.scalar(stmt)
+        return await self.session.scalar(stmt)
 
-    def get_user_by_id(self, user_id: int) -> list[Order]:
+    async def get_user_orders(self, user_id: int) -> list[Order]:
         stmt = (
             select(Order)
             .where(Order.user_id == user_id)
@@ -26,9 +27,11 @@ class OrderRepository:
             )
             .order_by(Order.created_at.desc())
         )
-        return list(self.session.scalars(stmt).all())
+        result = await self.session.scalars(stmt)
 
-    def create_order(self, user_id: int, total_amount: float) -> Order:
+        return list(result.all())
+
+    async def create_order(self, user_id: int, total_amount: float) -> Order:
         order = Order(
             user_id=user_id,
             total_amount=total_amount,
@@ -37,13 +40,12 @@ class OrderRepository:
 
         return order
 
-    def add_item(self,
-                 order_id: int,
-                 product_id: int,
-                 product_name: str,
-                 product_price: float,
-                 quantity: int) -> OrderItem:
-
+    async def add_item(self,
+                       order_id: int,
+                       product_id: int,
+                       product_name: str,
+                       product_price: float,
+                       quantity: int) -> OrderItem:
         item = OrderItem(
             order_id=order_id,
             product_id=product_id,
@@ -55,9 +57,9 @@ class OrderRepository:
 
         return item
 
-    def update_status(self, order: Order, status: str) -> Order:
+    async def update_status(self, order: Order, status: str) -> Order:
         order.status = status
         return order
 
-    def remove(self, order: Order) -> None:
-        self.session.delete(order)
+    async def remove(self, order: Order) -> None:
+        await self.session.delete(order)
