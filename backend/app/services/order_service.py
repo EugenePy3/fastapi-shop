@@ -1,7 +1,6 @@
 from ..core.db_manager import DBManager
 from ..core.exceptions import CartNotFoundError, EmptyCartError, OrderNotFoundError
 from ..enums.order_status import OrderStatus
-from ..models import product
 from ..models.order import Order
 
 

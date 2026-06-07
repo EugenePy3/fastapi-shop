@@ -41,7 +41,7 @@ class CartNotFoundError(AppError):
 
 
 class CartItemNotFoundError(AppError):
-    """Cart item not found."""
+    """Cart Item not found."""
 
 
 class EmptyCartError(AppError):

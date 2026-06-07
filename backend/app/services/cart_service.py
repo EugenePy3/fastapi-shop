@@ -56,6 +56,6 @@ class CartService:
 
     async def clear_cart(self, user_id: int) -> None:
         cart = await self.carts.get_or_create_cart(user_id)
-        await self.carts.create_cart(cart.id)
+        await self.carts.clear_cart(cart.id)
 
 

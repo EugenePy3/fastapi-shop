@@ -1,5 +1,5 @@
 from typing import Callable
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import SessionLocal
 from app.repositories.user_repository import AuthRepository, UserRepository
@@ -10,10 +10,12 @@ from app.repositories.order_repository import OrderRepository
 
 
 class DBManager:
-    def __init__(self, session_factory: Callable[[], Session] = SessionLocal):
+    def __init__(self, session_factory: Callable[[], AsyncSession] = SessionLocal):
         self.session_factory = session_factory
-        self.session: Session | None = None
+        self.session: AsyncSession | None = None
 
+        # Инициализируем репозитории как None,
+        # они заполнятся при входе в контекстный менеджер
         self.users: UserRepository | None = None
         self.auth: AuthRepository | None = None
         self.categories: CategoryRepository | None = None
@@ -21,9 +23,8 @@ class DBManager:
         self.carts: CartRepository | None = None
         self.orders: OrderRepository | None = None
 
-    def __enter__(self) -> "DBManager":
-        self.session = self.session_factory()
-
+    def _init_repositories(self):
+        # Передаем асинхронную сессию во все репозитории
         self.users = UserRepository(self.session)
         self.auth = AuthRepository(self.session)
         self.categories = CategoryRepository(self.session)
@@ -31,18 +32,30 @@ class DBManager:
         self.carts = CartRepository(self.session)
         self.orders = OrderRepository(self.session)
 
+    async def __aenter__(self) -> "DBManager":
+        # Создаем асинхронную сессию
+        self.session = self.session_factory()
+        self._init_repositories()
+
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         if not self.session:
             return
 
         try:
             if exc_type:
-                self.session.rollback()
+                # Если внутри блока "async with" произошла ошибка, откатываем изменения
+                await self.session.rollback()
             else:
-                self.session.commit()
+                # Если всё прошло успешно, фиксируем транзакцию
+                await self.session.commit()
         finally:
-            self.session.close()
+            # В любом случае закрываем сессию для освобождения пула соединений
+            await self.session.close()
+
+    async def flush(self) -> None:
+        if self.session:
+            await self.session.flush()
 
 

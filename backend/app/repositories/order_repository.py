@@ -37,6 +37,7 @@ class OrderRepository:
             total_amount=total_amount,
         )
         self.session.add(order)
+        await self.session.flush()
 
         return order
 
