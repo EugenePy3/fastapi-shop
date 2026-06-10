@@ -8,7 +8,11 @@ from app.core.exceptions import (
     CategoryAlreadyExistsError,
     CategoryDeleteError,
     ProductNotFoundError,
-    CartItemNotFoundError
+    CartNotFoundError,
+    CartItemNotFoundError,
+    EmptyCartError,
+    OrderNotFoundError,
+    PermissionDeniedError,
 )
 
 
@@ -54,11 +58,40 @@ def product_not_found_handler(request: Request, exc: ProductNotFoundError):
     )
 
 
+def cart_not_found_handler(request: Request, exc: CartNotFoundError):
+    return JSONResponse(
+        status_code=404,
+        content={'detail': str(exc)}
+    )
+
+
 def cart_item_not_found_handler(request: Request, exc: CartItemNotFoundError):
     return JSONResponse(
         status_code=404,
         content={'detail': str(exc)}
     )
+
+
+def empty_cart_error_handler(request: Request, exc: EmptyCartError):
+    return JSONResponse(
+        status_code=404,
+        content={'detail': str(exc)}
+    )
+
+
+def order_not_found_error_handler(request: Request, exc: OrderNotFoundError):
+    return JSONResponse(
+        status_code=404,
+        content={'detail': str(exc)}
+    )
+
+
+def permission_denied_error_handler(request: Request, exc: PermissionDeniedError):
+    return JSONResponse(
+        status_code=404,
+        content={'detail': str(exc)}
+    )
+
 
 
 

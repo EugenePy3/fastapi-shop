@@ -13,7 +13,6 @@ class Order(Base):
     user_id: Mapped[int] = mapped_column(
         ForeignKey('users.id')
     )
-
     status: Mapped[OrderStatus] = mapped_column(
         default=OrderStatus.PENDING
     )

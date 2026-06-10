@@ -11,49 +11,49 @@ router = APIRouter(
 )
 
 
-@router.get('', response_model=List[CategoryResponse], status_code=status.HTTP_200_OK)
-def get_categories(db: DBManagerDep):
+@router.get('', response_model=list[CategoryResponse], status_code=status.HTTP_200_OK)
+async def get_categories(db: DBManagerDep):
     service = CategoryService(db)
-    return service.get_all_categories()
+    return await service.get_all_categories()
 
 
 @router.get('/{category_id}', response_model=CategoryResponse, status_code=status.HTTP_200_OK)
-def get_category(
+async def get_category(
         category_id: int,
         db: DBManagerDep
 ):
     service = CategoryService(db)
-    return service.get_category_by_id(category_id)
+    return await service.get_category_by_id(category_id)
 
 
 @router.post('', response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
-def create_category(
-        category_data: CategoryCreate,
+async def create_category(
+        data: CategoryCreate,
         db: DBManagerDep,
         admin: User = Depends(require_admin)
 ):
     service = CategoryService(db)
-    return service.create_category(category_data)
+    return await service.create_category(data)
 
 
 @router.patch('/{category_id}', response_model=CategoryResponse, status_code=status.HTTP_200_OK)
-def update_category(
+async def update_category(
         category_id: int,
-        update_data: CategoryUpdate,
+        data: CategoryUpdate,
         db: DBManagerDep,
         admin: User = Depends(require_admin)
 ):
     service = CategoryService(db)
-    return service.update_category(category_id, update_data)
+    return await service.update_category(category_id, data)
 
 
-@router.delete('/{category_id}', status_code=status.HTTP_200_OK)
-def remove_category(
+@router.delete('/{category_id}', status_code=status.HTTP_204_NO_CONTENT)
+async def remove_category(
         category_id: int,
         db: DBManagerDep,
         admin: User = Depends(require_admin)
 ):
     service = CategoryService(db)
-    return service.remove_category(category_id)
+    await service.remove_category(category_id)
 
 

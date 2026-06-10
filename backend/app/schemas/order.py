@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 
+from app.enums.order_status import OrderStatus
+
 
 class OrderItemResponse(BaseModel):
     id: int = Field(..., description="Order item ID")
@@ -23,8 +25,8 @@ class OrderResponse(BaseModel):
     )
 
 
-class OrderCreate(BaseModel):
-    shipping_address: str = Field(..., description="Shipping address")
+class OrderStatusUpdate(BaseModel):
+    status: OrderStatus = Field(..., description='Order status')
 
 
 class OrderListResponse(BaseModel):

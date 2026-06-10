@@ -1,11 +1,9 @@
-from sqlalchemy.orm import Session
 from typing import List
 
 from ..core.db_manager import DBManager
 from ..core.exceptions import CategoryNotFoundError, CategoryDeleteError, CategoryAlreadyExistsError
 from ..models import Category
-from ..repositories.category_repository import CategoryRepository
-from ..schemas.category import CategoryResponse, CategoryCreate, CategoryUpdate
+from ..schemas.category import CategoryCreate, CategoryUpdate
 
 
 class CategoryService:
@@ -13,53 +11,82 @@ class CategoryService:
         self.db = db
         self.categories = db.categories
 
-    def get_all_categories(self) -> List[CategoryResponse]:
-        categories = self.categories.get_all()
-        return [CategoryResponse.model_validate(cat) for cat in categories]
+    async def get_all_categories(self) -> list[Category]:
+        return await self.categories.get_all()
 
-    def get_category_by_id(self, category_id: int) -> CategoryResponse:
-        category = self.categories.get_by_id(category_id)
+    async def get_category_by_id(self, category_id: int) -> Category:
+        category = await self.categories.get_by_id(category_id)
+
         if not category:
-            raise CategoryNotFoundError(f'Category with id {category_id} not found')
+            raise CategoryNotFoundError(
+                f'Category with id {category_id} not found.'
+            )
 
-        return CategoryResponse.model_validate(category)
+        return category
 
-    def get_category_by_slug(self, category_slug: str) -> CategoryResponse:
-        category = self.categories.get_by_slug(category_slug)
+    async def get_category_by_slug(self, slug: str) -> Category:
+        category = await self.categories.get_by_slug(slug)
+
         if not category:
-            raise CategoryNotFoundError(f'Category with slug {category_slug} not found')
+            raise CategoryNotFoundError(
+                f'Category with slug {slug} not found'
+            )
 
-        return CategoryResponse.model_validate(category)
+        return category
 
-    def create_category(self, category_data: CategoryCreate) -> CategoryResponse:
-        existing_category = self.categories.get_by_slug(category_data.slug)
-        if existing_category:
-            raise CategoryAlreadyExistsError(f'Category with slug {category_data.slug} already exists')
-        category = self.categories.create(category_data)
-        return CategoryResponse.model_validate(category)
+    async def create_category(self, data: CategoryCreate) -> Category:
+        existing = await self.categories.get_by_slug(data.slug)
 
-    def update_category(self, category_id: int, update_data: CategoryUpdate) -> CategoryResponse:
-        category = self.categories.get_by_id(category_id)
+        if existing:
+            raise CategoryAlreadyExistsError(
+                f'Category with slug {data.slug} already exists'
+            )
+        category = await self.categories.create(data)
+
+        await self.db.flush()
+        await self.db.refresh(category)
+
+        return category
+
+    async def update_category(self, category_id: int, data: CategoryUpdate) -> Category:
+        category = await self.categories.get_by_id(category_id)
+
         if not category:
-            raise CategoryNotFoundError(f'Category with id {category_id} not found')
+            raise CategoryNotFoundError(
+                f'Category with id {category_id} not found'
+            )
 
-        existing_category = self.categories.get_by_slug(update_data.slug)
-        if existing_category and existing_category.id != category_id:
-            raise CategoryAlreadyExistsError(f'Category with slug {update_data.slug} already exists')
+        if data.slug:
+            existing = await self.categories.get_by_slug(data.slug)
+            if existing and existing.id != category_id:
+                raise CategoryAlreadyExistsError(
+                    f'Category with slug {data.slug} already exists'
+                )
 
-        category.name = update_data.name
-        category.slug = update_data.slug
-        category = self.categories.update(category)
-        return CategoryResponse.model_validate(category)
+        if data.name is not None:
+            category.name = data.name
+        if data.slug is not None:
+            category.slug = data.slug
 
-    def remove_category(self, category_id: int) -> Category:
-        category = self.categories.get_by_id(category_id)
+        await self.db.flush()
+        await self.db.refresh(category)
+
+        return category
+
+    async def remove_category(self, category_id: int) -> None:
+        category = await self.categories.get_by_id(category_id)
+
         if not category:
-            raise CategoryNotFoundError(f'Category with id {category_id} not found')
-        product_count = self.categories.count_products_by_category(category_id)
+            raise CategoryNotFoundError(
+                f'Category with id {category_id} not found'
+            )
+
+        product_count = await self.categories.count_products_by_category(category_id)
+
         if product_count > 0:
-            raise CategoryDeleteError(f'Cannot delete category: {product_count} products are still assigned to it')
+            raise CategoryDeleteError(
+                f'Cannot delete category: {product_count} products still assigned'
+            )
 
-        return self.categories.remove(category)
-
+        await self.categories.remove(category)
 

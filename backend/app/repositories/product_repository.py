@@ -1,72 +1,73 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
-from typing import List, Optional
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 from ..models.product import Product
 from ..schemas.product import ProductCreate
 
 
 class ProductRepository:
-    def __init__(self, session: Session):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
-    def get_all(self) -> List[Product]:
+    async def get_all(self) -> list[Product]:
         stmt = (
             select(Product)
             .options(joinedload(Product.category))
         )
+        result = await self.session.scalars(stmt)
 
-        return self.session.execute(stmt).scalars().all()
+        return list(result.all())
 
-    def get_by_id(self, product_id: int) -> Optional[Product]:
+    async def get_by_id(self, product_id: int) -> Product | None:
         stmt = (
             select(Product)
             .options(joinedload(Product.category))
             .where(Product.id == product_id)
         )
 
-        return self.session.execute(stmt).scalar_one_or_none()
+        return await self.session.scalar(stmt)
 
-    def get_by_slug(self, slug: str) -> Optional[Product]:
+    async def get_by_slug(self, slug: str) -> Product | None:
         stmt = select(Product).where(Product.slug == slug)
 
-        return self.session.execute(stmt).scalar_one_or_none()
+        return await self.session.scalar(stmt)
 
-    def get_by_category(self, category_id: int) -> List[Product]:
+    async def get_by_category(self, category_id: int) -> list[Product]:
         stmt = (
             select(Product)
             .options(joinedload(Product.category))
             .where(Product.category_id == category_id)
         )
+        result = await self.session.scalars(stmt)
 
-        return self.session.execute(stmt).scalars().all()
+        return list(result.all())
 
-    def create(self, product_data: ProductCreate) -> Product:
+    async def create(self, product_data: ProductCreate) -> Product:
         product = Product(**product_data.model_dump())
 
         self.session.add(product)
-        self.session.flush()
-        self.session.refresh(product)
+        # await self.session.flush()
+        # await self.session.refresh(product)
 
         return product
 
-    def update(self, product: Product) -> Product:
+    async def update(self, product: Product) -> Product:
         self.session.add(product)
-        self.session.flush()
-        self.session.refresh(product)
 
         return product
 
-    def get_multiple_by_ids(self, product_ids: List[int]) -> List[Product]:
+    async def get_multiple_by_ids(self, product_ids: list[int]) -> list[Product]:
         stmt = (
             select(Product)
             .options(joinedload(Product.category))
             .where(Product.id.in_(product_ids))
         )
+        result = await self.session.execute(stmt)
 
-        return self.session.execute(stmt).scalars().all()
+        return list(result.scalars().all())
 
-    def remove(self, product: Product) -> Product:
-        self.session.delete(product)
-        self.session.flush()
+    async def remove(self, product: Product) -> Product:
+        await self.session.delete(product)
+        # await self.session.flush()
 
         return product

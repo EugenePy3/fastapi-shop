@@ -16,7 +16,9 @@ class OrderRepository:
                 joinedload(Order.items)
             )
         )
-        return await self.session.scalar(stmt)
+        result = await self.session.execute(stmt)
+
+        return result.unique().scalar_one_or_none()
 
     async def get_user_orders(self, user_id: int) -> list[Order]:
         stmt = (
@@ -27,9 +29,9 @@ class OrderRepository:
             )
             .order_by(Order.created_at.desc())
         )
-        result = await self.session.scalars(stmt)
+        result = await self.session.execute(stmt)
 
-        return list(result.all())
+        return list(result.scalars().unique().all())
 
     async def create_order(self, user_id: int, total_amount: float) -> Order:
         order = Order(

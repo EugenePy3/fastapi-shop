@@ -1,7 +1,8 @@
 from ..core.db_manager import DBManager
-from ..core.exceptions import CartNotFoundError, EmptyCartError, OrderNotFoundError
+from ..core.exceptions import CartNotFoundError, EmptyCartError, OrderNotFoundError, PermissionDeniedError
 from ..enums.order_status import OrderStatus
 from ..models.order import Order
+from ..models.user import User
 
 
 class OrderService:
@@ -37,10 +38,15 @@ class OrderService:
 
         return order
 
-    async def get_order(self, order_id: int) -> Order:
+    async def get_order(self, order_id: int, current_user: User) -> Order:
         order = await self.orders.get_by_id(order_id)
         if not order:
             raise OrderNotFoundError(f'Order with id {order_id} not found.')
+        if (
+            not current_user.is_admin
+            and order.user_id != current_user.id
+        ):
+            raise PermissionDeniedError('You do not have access to this order.')
 
         return order
 

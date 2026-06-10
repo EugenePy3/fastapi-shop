@@ -50,3 +50,7 @@ class EmptyCartError(AppError):
 
 class OrderNotFoundError(AppError):
     """Order not found."""
+
+
+class PermissionDeniedError(AppError):
+    """Permission denied."""

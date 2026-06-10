@@ -1,7 +1,8 @@
-from typing import Callable
+from typing import Callable, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import SessionLocal
+
 from app.repositories.user_repository import AuthRepository, UserRepository
 from app.repositories.category_repository import CategoryRepository
 from app.repositories.product_repository import ProductRepository
@@ -57,5 +58,9 @@ class DBManager:
     async def flush(self) -> None:
         if self.session:
             await self.session.flush()
+
+    async def refresh(self, instance: Any) -> None:
+        if self.session:
+            await self.session.refresh(instance)
 
 
