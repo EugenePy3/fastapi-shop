@@ -63,4 +63,8 @@ class DBManager:
         if self.session:
             await self.session.refresh(instance)
 
+    async def delete(self, instance: Any) -> None:
+        if self.session:
+            await self.session.delete(instance)
+
 

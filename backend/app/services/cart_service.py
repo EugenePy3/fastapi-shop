@@ -11,6 +11,7 @@ class CartService:
     async def add_to_cart(self, user_id: int, product_id: int, quantity: int) -> CartItem:
         cart = await self.carts.get_or_create_cart(user_id)
         product = await self.products.get_by_id(product_id)
+
         if not product:
             raise ProductNotFoundError(f'Product with id {product_id} not found')
 

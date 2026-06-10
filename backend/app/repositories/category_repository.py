@@ -36,12 +36,6 @@ class CategoryRepository:
 
         return category
 
-    async def update(self, category: Category) -> Category:
-        await self.session.flush()
-        await self.session.refresh(category)
-
-        return category
-
     async def count_products_by_category(self, category_id: int) -> int:
         stmt = (
             select(func.count(Product.id))

@@ -46,13 +46,6 @@ class ProductRepository:
         product = Product(**product_data.model_dump())
 
         self.session.add(product)
-        # await self.session.flush()
-        # await self.session.refresh(product)
-
-        return product
-
-    async def update(self, product: Product) -> Product:
-        self.session.add(product)
 
         return product
 
@@ -68,6 +61,5 @@ class ProductRepository:
 
     async def remove(self, product: Product) -> Product:
         await self.session.delete(product)
-        # await self.session.flush()
 
         return product

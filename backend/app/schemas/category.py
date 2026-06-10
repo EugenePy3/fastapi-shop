@@ -1,9 +1,18 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class CategoryBase(BaseModel):
-    name: str = Field(..., min_length=5, max_length=50, description='Category name')
-    slug: str = Field(..., min_length=5, max_length=50, description='URL-friendly category name')
+    name: str = Field(
+        min_length=5,
+        max_length=50,
+        description='Category name'
+    )
+
+    slug: str = Field(
+        min_length=5,
+        max_length=50,
+        description='URL-friendly category name'
+    )
 
 
 class CategoryCreate(CategoryBase):
@@ -11,12 +20,22 @@ class CategoryCreate(CategoryBase):
 
 
 class CategoryUpdate(BaseModel):
-    name: str = Field(..., min_length=5, max_length=50, description='Updated category name')
-    slug: str = Field(..., min_length=5, max_length=50, description='Display name of the category')
+    name: str = Field(
+        min_length=5,
+        max_length=50,
+        description='Updated category name'
+    )
+
+    slug: str = Field(
+        min_length=5,
+        max_length=50,
+        description='Display name of the category'
+    )
 
 
 class CategoryResponse(CategoryBase):
-    id: int = Field(..., description='Unique category identifier')
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    id: int = Field(description='Unique category identifier')
+
+

@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status
-from typing import List
 from ..dependencies import require_admin, DBManagerDep
 from ..models.user import User
 from ..services.category_service import CategoryService, CategoryUpdate
@@ -14,6 +13,7 @@ router = APIRouter(
 @router.get('', response_model=list[CategoryResponse], status_code=status.HTTP_200_OK)
 async def get_categories(db: DBManagerDep):
     service = CategoryService(db)
+
     return await service.get_all_categories()
 
 
@@ -23,6 +23,7 @@ async def get_category(
         db: DBManagerDep
 ):
     service = CategoryService(db)
+
     return await service.get_category_by_id(category_id)
 
 
@@ -33,6 +34,7 @@ async def create_category(
         admin: User = Depends(require_admin)
 ):
     service = CategoryService(db)
+
     return await service.create_category(data)
 
 
@@ -44,6 +46,7 @@ async def update_category(
         admin: User = Depends(require_admin)
 ):
     service = CategoryService(db)
+
     return await service.update_category(category_id, data)
 
 

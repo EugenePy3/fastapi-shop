@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Request, Response
 from app.core.config import settings
 from app.dependencies import DBManagerDep, get_current_user_from_session
 from app.models.user import User
-from app.schemas.user import LoginRequest, SessionLoginResponse, UserRead
+from app.schemas.user import LoginRequest, SessionLoginResponse, UserResponse
 from app.services.auth_service import AuthServiceSession
 
 router = APIRouter(prefix="/auth", tags=["Session"])
@@ -42,6 +42,7 @@ def login_with_session(
     session_service = AuthServiceSession(db)
     user, raw_token = session_service.login(data.name, data.password)
     _set_session_cookie(response, raw_token)
+
     return SessionLoginResponse(user=user)
 
 
@@ -51,9 +52,11 @@ def logout_session(request: Request, response: Response, db: DBManagerDep) -> di
     raw_token = request.cookies.get(settings.session_cookie_name)
     session_service.logout(raw_token)
     _clear_session_cookie(response)
+
     return {"detail": "Logged out"}
 
 
 @router.get("/me/session", summary="Get Current User (Session)")
-def me_session(user: User = Depends(get_current_user_from_session)) -> UserRead:
+def me_session(user: User = Depends(get_current_user_from_session)) -> UserResponse:
+
     return user

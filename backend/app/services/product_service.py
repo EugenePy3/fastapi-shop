@@ -3,7 +3,7 @@ from slugify import slugify
 from ..core.db_manager import DBManager
 from ..core.exceptions import ProductNotFoundError, CategoryNotFoundError
 from ..models import Product
-from ..schemas.product import ProductResponse, ProductListResponse, ProductCreate, ProductUpdate
+from ..schemas.product import ProductCreate, ProductUpdate
 
 
 class ProductService:
@@ -12,62 +12,74 @@ class ProductService:
         self.products = db.products
         self.categories = db.categories
 
-    def get_all_products(self) -> ProductListResponse:
-        products = self.products.get_all()
-        products_response = [ProductResponse.model_validate(prod) for prod in products]
-        return ProductListResponse(products=products_response, total=len(products_response))
+    async def get_all_products(self) -> list[Product]:
+        return await self.products.get_all()
 
-    def get_product_by_id(self, product_id: int) -> ProductResponse:
-        product = self.products.get_by_id(product_id)
+    async def get_product_by_id(self, product_id: int) -> Product:
+        product = await self.products.get_by_id(product_id)
+
         if not product:
             raise ProductNotFoundError(f'Product with id {product_id} not found')
 
-        return ProductResponse.model_validate(product)
+        return product
 
-    def get_products_by_category(self, category_id: int) -> ProductListResponse:
-        category = self.categories.get_by_id(category_id)
+    async def get_products_by_category(self, category_id: int) -> list[Product]:
+        category = await self.categories.get_by_id(category_id)
+
         if not category:
             raise CategoryNotFoundError(f'Category with id {category_id} not found')
 
-        products = self.products.get_by_category(category_id)
-        products_response = [ProductResponse.model_validate(prod) for prod in products]
-        return ProductListResponse(products=products_response, total=len(products_response))
+        return await self.products.get_by_category(category_id)
 
-    def create_product(self, product_data: ProductCreate) -> ProductResponse:
-        category = self.categories.get_by_id(product_data.category_id)
+    async def create_product(self, data: ProductCreate) -> Product:
+        category = await self.categories.get_by_id(data.category_id)
+
         if not category:
-            raise CategoryNotFoundError(f'Category with id {product_data.category_id} not found')
+            raise CategoryNotFoundError(f'Category with id {data.category_id} not found')
 
-        product = self.products.create(product_data)
+        product = await self.products.create(data)
 
-        base_slug = slugify(product.name, lowercase=True)
-        product.slug = f'{base_slug}-{product.id}'
-        product = self.products.update(product)
+        await self.db.flush()
 
-        return ProductResponse.model_validate(product)
+        product.slug = (
+            f"{slugify(product.name, lowercase=True)}-{product.id}"
+        )
 
-    def update_product(self, product_id: int, update_data: ProductUpdate) -> ProductResponse:
-        product = self.products.get_by_id(product_id)
+        return product
+
+    async def update_product(self, product_id: int, data: ProductUpdate) -> Product:
+        product = await self.products.get_by_id(product_id)
+
         if not product:
             raise ProductNotFoundError(f'Product with id {product_id} not found')
-        if update_data.category_id is not None:
-            category = self.categories.get_by_id(update_data.category_id)
-            if not category:
-                raise CategoryNotFoundError(f'Category with id {update_data.category_id} not found')
 
-        updates = update_data.model_dump(exclude_unset=True)
+        if data.category_id is not None:
+            category = await self.categories.get_by_id(data.category_id)
+
+            if not category:
+                raise CategoryNotFoundError(f'Category with id {data.category_id} not found')
+
+        updates = data.model_dump(exclude_unset=True)
 
         for field, value in updates.items():
             setattr(product, field, value)
-        if 'name' in updates:
-            base_slug = slugify(product.name, lowercase=True)
-            product.slug = f'{base_slug}-{product.id}'
 
-        product = self.products.update(product)
-        return ProductResponse.model_validate(product)
+        if data.name is not None:
+            product.slug = (
+                f"{slugify(product.name, lowercase=True)}-{product.id}"
+            )
 
-    def remove_product(self, product_id: int) -> Product:
-        product = self.products.get_by_id(product_id)
+        await self.db.flush()
+
+        return product
+
+    async def remove_product(self, product_id: int) -> Product:
+        product = await self.products.get_by_id(product_id)
+
         if not product:
             raise ProductNotFoundError(f'Product with id {product_id} not found')
-        return self.products.remove(product)
+
+        await self.db.delete(product)
+        await self.db.flush()
+
+        return product

@@ -14,49 +14,67 @@ router = APIRouter(
 
 
 @router.get('', response_model=ProductListResponse, status_code=status.HTTP_200_OK)
-def get_products(db: DBManagerDep):
+async def get_products(db: DBManagerDep):
     service = ProductService(db)
-    return service.get_all_products()
+
+    products = await service.get_all_products()
+
+    return ProductListResponse(
+        products=products,
+        total=len(products)
+    )
 
 
 @router.get('/{product_id}', response_model=ProductResponse, status_code=status.HTTP_200_OK)
-def get_product(product_id: int, db: DBManagerDep):
+async def get_product(product_id: int, db: DBManagerDep):
     service = ProductService(db)
-    return service.get_product_by_id(product_id)
+
+    return await service.get_product_by_id(product_id)
 
 
 @router.get('/category/{category_id}', response_model=ProductListResponse, status_code=status.HTTP_200_OK)
-def get_products_by_category(category_id: int, db: DBManagerDep):
+async def get_products_by_category(category_id: int, db: DBManagerDep):
     service = ProductService(db)
-    return service.get_products_by_category(category_id)
+
+    products = await service.get_products_by_category(
+        category_id
+    )
+
+    return ProductListResponse(
+        products=products,
+        total=len(products)
+    )
 
 
 @router.post('', response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
-def create_product(
+async def create_product(
         product_data: ProductCreate,
         db: DBManagerDep,
         admin: User = Depends(require_admin)
 ):
     service = ProductService(db)
-    return service.create_product(product_data)
+
+    return await service.create_product(product_data)
 
 
 @router.patch('/{product_id}', response_model=ProductResponse, status_code=status.HTTP_200_OK)
-def update_product(
+async def update_product(
         product_id: int,
         update_data: ProductUpdate,
         db: DBManagerDep,
         admin: User = Depends(require_admin)
 ):
     service = ProductService(db)
-    return service.update_product(product_id, update_data)
+
+    return await service.update_product(product_id, update_data)
 
 
 @router.delete('/{product_id}', response_model=ProductResponse, status_code=status.HTTP_200_OK)
-def remove_product(
+async def remove_product(
         product_id: int,
         db: DBManagerDep,
         admin: User = Depends(require_admin)
 ):
     service = ProductService(db)
-    return service.remove_product(product_id)
+
+    return await service.remove_product(product_id)
