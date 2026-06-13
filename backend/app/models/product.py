@@ -10,10 +10,18 @@ class Product(Base):
     __tablename__ = 'products'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
-    slug: Mapped[str] = mapped_column(String(255), index=True, nullable=True)
+
+    name: Mapped[str] = mapped_column(
+        String(200), nullable=False, index=True
+    )
+    slug: Mapped[str] = mapped_column(
+        String(255), index=True, nullable=True
+    )
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+
+    price: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2), nullable=False
+    )
 
     category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'), nullable=False)
 

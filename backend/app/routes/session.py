@@ -36,9 +36,12 @@ def _clear_session_cookie(response: Response) -> None:
     "/login/session",
     summary="Create Session (Login)",
 )
-def login_with_session(
-        data: LoginRequest, response: Response, db: DBManagerDep
+async def login_with_session(
+        data: LoginRequest,
+        response: Response,
+        db: DBManagerDep,
 ) -> SessionLoginResponse:
+
     session_service = AuthServiceSession(db)
     user, raw_token = session_service.login(data.name, data.password)
     _set_session_cookie(response, raw_token)
@@ -47,7 +50,12 @@ def login_with_session(
 
 
 @router.post("/logout/session", summary="Delete Session (Logout)")
-def logout_session(request: Request, response: Response, db: DBManagerDep) -> dict:
+async def logout_session(
+        request: Request,
+        response: Response,
+        db: DBManagerDep,
+) -> dict:
+
     session_service = AuthServiceSession(db)
     raw_token = request.cookies.get(settings.session_cookie_name)
     session_service.logout(raw_token)
@@ -57,6 +65,8 @@ def logout_session(request: Request, response: Response, db: DBManagerDep) -> di
 
 
 @router.get("/me/session", summary="Get Current User (Session)")
-def me_session(user: User = Depends(get_current_user_from_session)) -> UserResponse:
+async def me_session(
+        user: User = Depends(get_current_user_from_session)
+) -> UserResponse:
 
     return user

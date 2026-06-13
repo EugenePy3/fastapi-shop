@@ -2,17 +2,26 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from app.core.exceptions import (
+    # --- Auth & Users ---
     UserAlreadyExistsError,
     InvalidCredentialsError,
+
+    # --- Sessions ---
+    SessionNotFoundError,
+    SessionExpiredError,
+
+    # --- Category ---
     CategoryNotFoundError,
     CategoryAlreadyExistsError,
     CategoryDeleteError,
-    ProductNotFoundError,
+
+    # --- Store & Cart ---
     CartNotFoundError,
     CartItemNotFoundError,
     EmptyCartError,
     OrderNotFoundError,
     PermissionDeniedError,
+    ProductNotFoundError,
 )
 
 
@@ -24,6 +33,20 @@ def user_already_exists_handler(request: Request, exc: UserAlreadyExistsError):
 
 
 def invalid_credentials_handler(request: Request, exc: InvalidCredentialsError):
+    return JSONResponse(
+        status_code=401,
+        content={'detail': str(exc)}
+    )
+
+
+def session_not_found_handler(request: Request, exc: SessionNotFoundError):
+    return JSONResponse(
+        status_code=404,
+        content={'detail': str(exc)}
+    )
+
+
+def session_expired_error_handler(request: Request, exc: SessionExpiredError):
     return JSONResponse(
         status_code=401,
         content={'detail': str(exc)}
@@ -91,8 +114,3 @@ def permission_denied_error_handler(request: Request, exc: PermissionDeniedError
         status_code=404,
         content={'detail': str(exc)}
     )
-
-
-
-
-

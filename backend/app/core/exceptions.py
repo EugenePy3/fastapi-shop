@@ -19,6 +19,14 @@ class UserNotFoundError(AppError):
     """Пользователь не найден."""
 
 
+class SessionNotFoundError(AppError):
+    """Session not found."""
+
+
+class SessionExpiredError(AppError):
+    """Session has expired."""
+
+
 # SHOP
 class CategoryNotFoundError(AppError):
     """Category not found."""

@@ -32,7 +32,7 @@ class CartRepository:
 
         return await self.create_cart(user_id)
 
-    # Работа с CartItem
+    # CartItem
 
     async def get_item(self, cart_id: int, product_id: int) -> CartItem | None:
         stmt = (

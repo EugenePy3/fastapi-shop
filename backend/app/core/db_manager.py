@@ -2,6 +2,7 @@ from typing import Callable, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import SessionLocal
+from app.repositories.session_repository import SessionRepository
 
 from app.repositories.user_repository import AuthRepository, UserRepository
 from app.repositories.category_repository import CategoryRepository
@@ -18,7 +19,7 @@ class DBManager:
         # Инициализируем репозитории как None,
         # они заполнятся при входе в контекстный менеджер
         self.users: UserRepository | None = None
-        self.auth: AuthRepository | None = None
+        self.sessions: SessionRepository | None
         self.categories: CategoryRepository | None = None
         self.products: ProductRepository | None = None
         self.carts: CartRepository | None = None
@@ -27,7 +28,7 @@ class DBManager:
     def _init_repositories(self):
         # Передаем асинхронную сессию во все репозитории
         self.users = UserRepository(self.session)
-        self.auth = AuthRepository(self.session)
+        self.sessions = SessionRepository(self.session)
         self.categories = CategoryRepository(self.session)
         self.products = ProductRepository(self.session)
         self.carts = CartRepository(self.session)

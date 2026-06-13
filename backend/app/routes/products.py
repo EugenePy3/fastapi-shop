@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
-from typing import List
-from ..database import get_db
+
 from ..dependencies import require_admin, DBManagerDep
 from ..models.user import User
 from ..services.product_service import ProductService
