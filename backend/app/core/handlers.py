@@ -1,116 +1,17 @@
-from fastapi import Request
 from fastapi.responses import JSONResponse
+from starlette.requests import Request
+from starlette.responses import Response
 
-from app.core.exceptions import (
-    # --- Auth & Users ---
-    UserAlreadyExistsError,
-    InvalidCredentialsError,
-
-    # --- Sessions ---
-    SessionNotFoundError,
-    SessionExpiredError,
-
-    # --- Category ---
-    CategoryNotFoundError,
-    CategoryAlreadyExistsError,
-    CategoryDeleteError,
-
-    # --- Store & Cart ---
-    CartNotFoundError,
-    CartItemNotFoundError,
-    EmptyCartError,
-    OrderNotFoundError,
-    PermissionDeniedError,
-    ProductNotFoundError,
-)
+from app.core.exceptions import AppError
 
 
-def user_already_exists_handler(request: Request, exc: UserAlreadyExistsError):
+async def app_error_handler(
+    request: Request,
+    exc: AppError,
+) -> Response:
     return JSONResponse(
-        status_code=400,
-        content={'detail': str(exc)}
-    )
-
-
-def invalid_credentials_handler(request: Request, exc: InvalidCredentialsError):
-    return JSONResponse(
-        status_code=401,
-        content={'detail': str(exc)}
-    )
-
-
-def session_not_found_handler(request: Request, exc: SessionNotFoundError):
-    return JSONResponse(
-        status_code=404,
-        content={'detail': str(exc)}
-    )
-
-
-def session_expired_error_handler(request: Request, exc: SessionExpiredError):
-    return JSONResponse(
-        status_code=401,
-        content={'detail': str(exc)}
-    )
-
-
-def category_not_found_handler(request: Request, exc: CategoryNotFoundError):
-    return JSONResponse(
-        status_code=404,
-        content={'detail': str(exc)}
-    )
-
-
-def category_already_exists_handler(request: Request, exc: CategoryAlreadyExistsError):
-    return JSONResponse(
-        status_code=409,
-        content={'detail': str(exc)}
-    )
-
-
-def category_delete_error_handler(request: Request, exc: CategoryDeleteError):
-    return JSONResponse(
-        status_code=409,
-        content={'detail': str(exc)}
-    )
-
-
-def product_not_found_handler(request: Request, exc: ProductNotFoundError):
-    return JSONResponse(
-        status_code=404,
-        content={'detail': str(exc)}
-    )
-
-
-def cart_not_found_handler(request: Request, exc: CartNotFoundError):
-    return JSONResponse(
-        status_code=404,
-        content={'detail': str(exc)}
-    )
-
-
-def cart_item_not_found_handler(request: Request, exc: CartItemNotFoundError):
-    return JSONResponse(
-        status_code=404,
-        content={'detail': str(exc)}
-    )
-
-
-def empty_cart_error_handler(request: Request, exc: EmptyCartError):
-    return JSONResponse(
-        status_code=404,
-        content={'detail': str(exc)}
-    )
-
-
-def order_not_found_error_handler(request: Request, exc: OrderNotFoundError):
-    return JSONResponse(
-        status_code=404,
-        content={'detail': str(exc)}
-    )
-
-
-def permission_denied_error_handler(request: Request, exc: PermissionDeniedError):
-    return JSONResponse(
-        status_code=404,
-        content={'detail': str(exc)}
+        status_code=exc.status_code,
+        content={
+            "detail": str(exc)
+        },
     )

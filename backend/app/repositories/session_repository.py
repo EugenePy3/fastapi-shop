@@ -28,9 +28,6 @@ class SessionRepository:
 
         return await self.session.scalar(stmt)
 
-    async def remove(self, session_record: UserSession) -> None:
-        await self.session.delete(session_record)
-
     async def remove_expired(self) -> None:
         stmt = delete(UserSession).where(
             UserSession.expires_at < datetime.now(timezone.utc)

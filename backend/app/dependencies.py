@@ -2,13 +2,12 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, Request, status
 
-
+from app.core.exceptions import PermissionDeniedError
 from app.database import AsyncSessionLocal
 from app.core.db_manager import DBManager
 from app.models.user import User
 from app.services.session_service import SessionService
 from app.utils.session_utils import get_session_token_hash
-
 
 """
 Application dependencies.
@@ -30,10 +29,9 @@ DBManagerDep = Annotated[
 
 
 async def get_current_user_from_session(
-    request: Request,
-    db: DBManagerDep,
+        request: Request,
+        db: DBManagerDep,
 ) -> User:
-
     token_hash = get_session_token_hash(request)
 
     service = SessionService(db)
@@ -51,11 +49,10 @@ async def require_admin(
         user: CurrentUserDep,
 ) -> User:
     if not user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admins only"
-        )
+        raise PermissionDeniedError("Admins only")
+
     return user
+
 
 AdminUserDep = Annotated[
     User,

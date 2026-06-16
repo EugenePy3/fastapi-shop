@@ -23,8 +23,8 @@ class SessionService:
             token_hash: str,
     ) -> User:
         """
-            Validates user session and returns
-            the authenticated user.
+        Validates user session and returns
+        the authenticated user.
         """
 
         now = datetime.now(timezone.utc)
@@ -94,9 +94,9 @@ class SessionService:
             absolute_expires_at: datetime,
     ) -> None:
         """
-            Extends session expiration using rolling
-            expiration strategy without exceeding
-            the absolute lifetime limit.
+        Extends session expiration using rolling
+        expiration strategy without exceeding
+        the absolute lifetime limit.
         """
         if (
                 now - session_record.last_refreshed_at
@@ -114,9 +114,7 @@ class SessionService:
             session_record.last_refreshed_at = now
 
     async def expire_session(self, session_record: UserSession, message: str) -> None:
-        await self.db.sessions.remove(
-            session_record
-        )
+        await self.db.delete(session_record)
         await self.db.flush()
 
         raise SessionExpiredError(message)

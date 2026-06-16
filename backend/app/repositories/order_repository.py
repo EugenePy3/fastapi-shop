@@ -63,6 +63,3 @@ class OrderRepository:
     async def update_status(self, order: Order, status: str) -> Order:
         order.status = status
         return order
-
-    async def remove(self, order: Order) -> None:
-        await self.session.delete(order)

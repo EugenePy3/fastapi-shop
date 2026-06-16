@@ -1,64 +1,90 @@
 class AppError(Exception):
-    """Basic application error."""
+    status_code = 400
+
+    def __init__(self, message: str):
+        super().__init__(message)
 
 
-class RepositoryNotInitializedError(AppError):
-    """Репозиторий не инициализирован в DBManager."""
+class NotFoundError(AppError):
+    status_code = 404
 
 
-class InvalidCredentialsError(AppError):
-    """Invalid username or password.
-    Неверная пара логин/пароль."""
+class ConflictError(AppError):
+    status_code = 409
 
 
-class UserAlreadyExistsError(AppError):
-    """User alredy exists."""
+class UnauthorizedError(AppError):
+    status_code = 401
 
 
-class UserNotFoundError(AppError):
-    """Пользователь не найден."""
+class ForbiddenError(AppError):
+    status_code = 403
 
 
-class SessionNotFoundError(AppError):
-    """Session not found."""
-
-
-class SessionExpiredError(AppError):
-    """Session has expired."""
-
-
-# SHOP
-class CategoryNotFoundError(AppError):
-    """Category not found."""
-
-
-class CategoryAlreadyExistsError(AppError):
-    """Category already exists."""
-
-
-class CategoryDeleteError(AppError):
-    """Category cannot be deleted."""
-
-
-class ProductNotFoundError(AppError):
-    """Product not found."""
-
-
-class CartNotFoundError(AppError):
-    """Cart not found."""
-
-
-class CartItemNotFoundError(AppError):
-    """Cart Item not found."""
-
-
+# --- 400 Bad Request ---
 class EmptyCartError(AppError):
     """Cart is empty."""
 
 
-class OrderNotFoundError(AppError):
+class RepositoryNotInitializedError(AppError):
+    """Repository is not initialized in DBManager."""
+
+
+# --- 401 Unauthorized ---
+class InvalidCredentialsError(UnauthorizedError):
+    """Invalid username or password. Неверная пара логин/пароль."""
+
+
+class SessionExpiredError(UnauthorizedError):
+    """Session has expired."""
+
+
+class MissingSessionCookieError(UnauthorizedError):
+    """Session cookie not found"""
+
+
+# --- 403 Forbidden ---
+class PermissionDeniedError(ForbiddenError):
+    """Permission denied."""
+
+
+# --- 404 Not Found ---
+class ProductNotFoundError(NotFoundError):
+    """Product not found."""
+
+
+class CategoryNotFoundError(NotFoundError):
+    """Category not found."""
+
+
+class OrderNotFoundError(NotFoundError):
     """Order not found."""
 
 
-class PermissionDeniedError(AppError):
-    """Permission denied."""
+class CartNotFoundError(NotFoundError):
+    """Cart not found."""
+
+
+class CartItemNotFoundError(NotFoundError):
+    """Cart Item not found."""
+
+
+class UserNotFoundError(NotFoundError):
+    """User not found."""
+
+
+class SessionNotFoundError(NotFoundError):
+    """Session not found."""
+
+
+# --- 409 Conflict ---
+class UserAlreadyExistsError(ConflictError):
+    """User already exists."""
+
+
+class CategoryAlreadyExistsError(ConflictError):
+    """Category already exists."""
+
+
+class CategoryDeleteError(ConflictError):
+    """Category cannot be deleted."""

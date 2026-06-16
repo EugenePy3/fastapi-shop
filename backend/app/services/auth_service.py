@@ -11,9 +11,23 @@ from app.core.tokens import tokens
 
 class AuthService:
     def __init__(self, db: DBManager):
+        """
+        Handles authentication logic:
+        - user credential verification
+        - session token creation
+        - session invalidation (logout)
+        """
         self.db = db
 
     async def login(self, name: str, password: str):
+        """
+        Authenticates user and creates session token.
+
+        Returns:
+            tuple: (User, raw_session_token)
+        Raises:
+            InvalidCredentialsError: if credentials are invalid
+        """
         user = await self.db.users.get_user_by_name(name)
 
         if not user or not security.verify_password(password, user.password_hash):
@@ -35,7 +49,9 @@ class AuthService:
         return user, raw_token
 
     async def logout(self, raw_token: str | None) -> None:
-
+        """
+        Deletes user session if token exists.
+        """
         if not raw_token:
             return
 

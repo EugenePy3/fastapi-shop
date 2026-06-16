@@ -59,7 +59,3 @@ class ProductRepository:
 
         return list(result.scalars().all())
 
-    async def remove(self, product: Product) -> Product:
-        await self.session.delete(product)
-
-        return product

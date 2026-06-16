@@ -5,6 +5,7 @@ from ..core.exceptions import ProductNotFoundError, CartItemNotFoundError
 
 class CartService:
     def __init__(self, db: DBManager):
+        self.db = db
         self.carts = db.carts
         self.products = db.products
 
@@ -53,7 +54,7 @@ class CartService:
         if not item:
             raise CartItemNotFoundError(f'Product with id {product_id} not found in cart')
 
-        await self.carts.remove_item(item)
+        await self.db.delete(item)
 
     async def clear_cart(self, user_id: int) -> None:
         cart = await self.carts.get_or_create_cart(user_id)

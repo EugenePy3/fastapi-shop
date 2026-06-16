@@ -43,6 +43,3 @@ class CategoryRepository:
             )
         return await self.session.scalar(stmt)
 
-    async def remove(self, category: Category) -> Category:
-        await self.session.delete(category)
-        return category

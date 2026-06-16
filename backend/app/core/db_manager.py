@@ -12,6 +12,10 @@ from app.repositories.order_repository import OrderRepository
 
 
 class DBManager:
+    """
+    Coordinates repositories and manages
+    the SQLAlchemy session lifecycle.
+    """
     def __init__(self, session_factory: Callable[[], AsyncSession] = AsyncSessionLocal):
         self.session_factory = session_factory
         self.session: AsyncSession | None = None

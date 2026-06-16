@@ -32,8 +32,6 @@ class CartRepository:
 
         return await self.create_cart(user_id)
 
-    # CartItem
-
     async def get_item(self, cart_id: int, product_id: int) -> CartItem | None:
         stmt = (
             select(CartItem)
@@ -51,9 +49,6 @@ class CartRepository:
         self.session.add(item)
         
         return item
-
-    async def remove_item(self, item: CartItem) -> None:
-        await self.session.delete(item)
 
     async def clear_cart(self, cart_id: int) -> None:
         stmt = (

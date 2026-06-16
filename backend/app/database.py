@@ -3,25 +3,22 @@ from sqlalchemy.ext.declarative import declarative_base
 from app.core.config import settings
 
 
-engine = create_async_engine(
-    settings.database_url
-)
+engine = create_async_engine(settings.database_url)
 
 AsyncSessionLocal = async_sessionmaker(
-    autocommit=False,
+    bind=engine,
     autoflush=False,
-    bind=engine
+    expire_on_commit=False,
 )
+
 Base = declarative_base()
 
 
 async def get_db():
-    db = AsyncSessionLocal()
-    try:
-        yield db
-    finally:
-        await db.close()
+    async with AsyncSessionLocal() as session:
+        yield session
 
 
-async def init_db():
-    Base.metadata.create_all(bind=engine)
+async def init_db() -> None:
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)

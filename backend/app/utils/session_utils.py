@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from fastapi import HTTPException, Request, status
 
 from app.core.config import settings
+from app.core.exceptions import MissingSessionCookieError
 from app.core.tokens import tokens
 from app.models.user import UserSession
 
@@ -15,10 +16,7 @@ def get_session_token_hash(request: Request) -> str:
     raw_token = request.cookies.get(settings.session_cookie_name)
 
     if not raw_token:
-        raise HTTPException(
-            status.HTTP_401_UNAUTHORIZED,
-            "No session cookie"
-        )
+        raise MissingSessionCookieError('Session cookie bot found')
     return tokens.hash_session_token(raw_token)
 
 

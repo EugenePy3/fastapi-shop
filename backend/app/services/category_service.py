@@ -1,5 +1,3 @@
-from typing import List
-
 from ..core.db_manager import DBManager
 from ..core.exceptions import CategoryNotFoundError, CategoryDeleteError, CategoryAlreadyExistsError
 from ..models import Category
@@ -88,5 +86,6 @@ class CategoryService:
                 f'Cannot delete category: {product_count} products still assigned'
             )
 
-        await self.categories.remove(category)
+        await self.db.delete(category)
+        await self.db.flush()
 
