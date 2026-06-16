@@ -1,44 +1,54 @@
-from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, Request, status
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
-from app.database import SessionLocal, get_db
+
+from app.database import AsyncSessionLocal
 from app.core.db_manager import DBManager
-from app.models.user import User, UserSession
+from app.models.user import User
+from app.services.session_service import SessionService
+from app.utils.session_utils import get_session_token_hash
 
-from app.core.tokens import tokens
 
+"""
+Application dependencies.
 
-SessionDep = Annotated[AsyncSession, Depends(get_db)]
+Provides database access,
+authentication and authorization dependencies.
+"""
 
 
 async def get_db_manager() -> DBManager:
-    async with DBManager(SessionLocal) as manager:
+    async with DBManager(AsyncSessionLocal) as manager:
         yield manager
 
 
-DBManagerDep = Annotated[DBManager, Depends(get_db_manager)]
+DBManagerDep = Annotated[
+    DBManager,
+    Depends(get_db_manager)
+]
 
 
 async def get_current_user_from_session(
-    request: Request, session: SessionDep
+    request: Request,
+    db: DBManagerDep,
 ) -> User:
-    token_hash = _get_session_token_hash(request)
-    stored_session = _find_session(session, token_hash)
-    now = datetime.utcnow()
-    absolute_expires_at = _ensure_not_absolute_expired(session, stored_session, now)
-    _extend_if_needed(session, stored_session, now, absolute_expires_at)
-    _check_expiry(session, stored_session, now)
-    user = _get_session_user(session, stored_session)
-    return user
+
+    token_hash = get_session_token_hash(request)
+
+    service = SessionService(db)
+
+    return await service.validate_session(token_hash)
+
+
+CurrentUserDep = Annotated[
+    User,
+    Depends(get_current_user_from_session)
+]
 
 
 async def require_admin(
-    user: User = Depends(get_current_user_from_session)
+        user: CurrentUserDep,
 ) -> User:
     if not user.is_admin:
         raise HTTPException(
@@ -47,3 +57,7 @@ async def require_admin(
         )
     return user
 
+AdminUserDep = Annotated[
+    User,
+    Depends(require_admin)
+]

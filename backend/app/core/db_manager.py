@@ -1,10 +1,10 @@
 from typing import Callable, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import SessionLocal
+from app.database import AsyncSessionLocal
 from app.repositories.session_repository import SessionRepository
 
-from app.repositories.user_repository import AuthRepository, UserRepository
+from app.repositories.user_repository import UserRepository
 from app.repositories.category_repository import CategoryRepository
 from app.repositories.product_repository import ProductRepository
 from app.repositories.cart_repository import CartRepository
@@ -12,7 +12,7 @@ from app.repositories.order_repository import OrderRepository
 
 
 class DBManager:
-    def __init__(self, session_factory: Callable[[], AsyncSession] = SessionLocal):
+    def __init__(self, session_factory: Callable[[], AsyncSession] = AsyncSessionLocal):
         self.session_factory = session_factory
         self.session: AsyncSession | None = None
 

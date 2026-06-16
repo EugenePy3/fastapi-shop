@@ -45,3 +45,7 @@ class SessionLoginResponse(BaseModel):
     user: UserResponse = Field(
         description='Authenticated user'
     )
+
+
+class MessageResponse(BaseModel):
+    detail: str
