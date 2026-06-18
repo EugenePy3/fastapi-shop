@@ -20,8 +20,6 @@ class DBManager:
         self.session_factory = session_factory
         self.session: AsyncSession | None = None
 
-        # Инициализируем репозитории как None,
-        # они заполнятся при входе в контекстный менеджер
         self.users: UserRepository | None = None
         self.sessions: SessionRepository | None
         self.categories: CategoryRepository | None = None
@@ -30,7 +28,6 @@ class DBManager:
         self.orders: OrderRepository | None = None
 
     def _init_repositories(self):
-        # Передаем асинхронную сессию во все репозитории
         self.users = UserRepository(self.session)
         self.sessions = SessionRepository(self.session)
         self.categories = CategoryRepository(self.session)
@@ -39,25 +36,22 @@ class DBManager:
         self.orders = OrderRepository(self.session)
 
     async def __aenter__(self) -> "DBManager":
-        # Создаем асинхронную сессию
         self.session = self.session_factory()
         self._init_repositories()
 
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+
         if not self.session:
             return
 
         try:
             if exc_type:
-                # Если внутри блока "async with" произошла ошибка, откатываем изменения
                 await self.session.rollback()
             else:
-                # Если всё прошло успешно, фиксируем транзакцию
                 await self.session.commit()
         finally:
-            # В любом случае закрываем сессию для освобождения пула соединений
             await self.session.close()
 
     async def flush(self) -> None:

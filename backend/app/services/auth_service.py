@@ -34,12 +34,15 @@ class AuthService:
             raise InvalidCredentialsError('Invalid username or password')
 
         raw_token, token_hash = tokens.generate_session_token()
+
         now = datetime.now(timezone.utc)
+
         absolute_expires_at = now + timedelta(days=settings.session_absolute_timeout_days)
         expires_at = min(
             absolute_expires_at,
             now + timedelta(minutes=settings.session_extend_minutes),
         )
+
         await self.db.sessions.create(
             user_id=user.id,
             token_hash=token_hash,
@@ -59,6 +62,6 @@ class AuthService:
         stored = await self.db.sessions.get_by_hash(token_hash)
 
         if stored:
-            await self.db.sessions.remove(stored)
+            await self.db.delete(stored)
 
 

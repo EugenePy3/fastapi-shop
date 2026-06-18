@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status
-from ..dependencies import require_admin, DBManagerDep
+from ..dependencies import require_admin, DBManagerDep, AdminUserDep
 from ..models.user import User
 from ..services.category_service import CategoryService, CategoryUpdate
 from ..schemas.category import CategoryResponse, CategoryCreate
@@ -31,7 +31,7 @@ async def get_category(
 async def create_category(
         data: CategoryCreate,
         db: DBManagerDep,
-        admin: User = Depends(require_admin)
+        admin: User = AdminUserDep,
 ):
     service = CategoryService(db)
 
@@ -43,7 +43,7 @@ async def update_category(
         category_id: int,
         data: CategoryUpdate,
         db: DBManagerDep,
-        admin: User = Depends(require_admin)
+        admin: User = AdminUserDep,
 ):
     service = CategoryService(db)
 
@@ -54,7 +54,7 @@ async def update_category(
 async def remove_category(
         category_id: int,
         db: DBManagerDep,
-        admin: User = Depends(require_admin)
+        admin: User = AdminUserDep,
 ):
     service = CategoryService(db)
     await service.remove_category(category_id)

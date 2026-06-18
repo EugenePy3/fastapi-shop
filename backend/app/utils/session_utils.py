@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from fastapi import HTTPException, Request, status
+from fastapi import Request
 
 from app.core.config import settings
 from app.core.exceptions import MissingSessionCookieError

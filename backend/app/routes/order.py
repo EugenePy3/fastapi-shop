@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status
 
-from ..dependencies import DBManagerDep, get_current_user_from_session, require_admin
+from ..dependencies import DBManagerDep, get_current_user_from_session, require_admin, CurrentUserDep, AdminUserDep
 from ..models import User
 from ..schemas.order import OrderResponse, OrderListResponse, OrderStatusUpdate
 from ..services.order_service import OrderService
@@ -14,7 +14,7 @@ router = APIRouter(
 @router.post('', response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
 async def create_order(
         db: DBManagerDep,
-        user: User = Depends(get_current_user_from_session),
+        user: User = CurrentUserDep,
 ):
     service = OrderService(db)
 
@@ -24,7 +24,7 @@ async def create_order(
 @router.get('', response_model=OrderListResponse, status_code=status.HTTP_200_OK)
 async def get_my_orders(
         db: DBManagerDep,
-        user: User = Depends(get_current_user_from_session),
+        user: User = CurrentUserDep,
 ):
     service = OrderService(db)
     orders = await service.get_user_orders(user.id)
@@ -38,7 +38,7 @@ async def get_my_orders(
 async def get_order(
         order_id: int,
         db: DBManagerDep,
-        user: User = Depends(get_current_user_from_session),
+        user: User = CurrentUserDep,
 ):
     service = OrderService(db)
 
@@ -53,7 +53,7 @@ async def update_order_status(
         order_id: int,
         data: OrderStatusUpdate,
         db: DBManagerDep,
-        admin: User = Depends(require_admin),
+        admin: User = AdminUserDep,
 ):
     service = OrderService(db)
 

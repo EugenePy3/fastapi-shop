@@ -28,21 +28,14 @@ class SessionService:
         """
 
         now = datetime.now(timezone.utc)
+
         session_record = await self.get_session_by_hash(token_hash)
-
-        # 2. Проверяем жесткий дедлайн
         absolute_expires_at = await self.ensure_not_absolute_expired(session_record, now)
-
-        # 3. Проверяем мягкий дедлайн
         await self.check_expiry(session_record, now)
-
-        # 4. Продлеваем при необходимости
         await self.extend_if_needed(session_record, now, absolute_expires_at)
 
-        # 5. Возвращаем юзера
         return await self.get_session_user(session_record)
 
-    # получить сессию
     async def get_session_by_hash(self, token_hash: str) -> UserSession:
         session_record = await self.db.sessions.get_by_hash(
             token_hash
@@ -86,7 +79,6 @@ class SessionService:
         if session_record.expires_at <= now:
             await self.expire_session(session_record, "Session expired")
 
-    # Продляем сессию, если прошло достаточно времени (Rolling Session)
     async def extend_if_needed(
             self,
             session_record: UserSession,

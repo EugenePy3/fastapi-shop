@@ -1,7 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, Request, status
-
+from fastapi import Depends, Request
 from app.core.exceptions import PermissionDeniedError
 from app.database import AsyncSessionLocal
 from app.core.db_manager import DBManager

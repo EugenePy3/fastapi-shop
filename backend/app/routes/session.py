@@ -1,8 +1,7 @@
-from fastapi import APIRouter, status, Depends, Request, Response
+from fastapi import APIRouter, Request, Response, status
 
 from app.core.config import settings
-from app.dependencies import DBManagerDep, get_current_user_from_session, CurrentUserDep
-from app.models.user import User
+from app.dependencies import DBManagerDep, CurrentUserDep
 from app.schemas.user import LoginRequest, SessionLoginResponse, UserResponse, MessageResponse
 from app.services.auth_service import AuthService
 from app.utils.cookies import set_session_cookie, clear_session_cookie
