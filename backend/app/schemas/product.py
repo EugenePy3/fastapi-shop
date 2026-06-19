@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, ConfigDict
 
 from datetime import datetime
+from decimal import Decimal
 from .category import CategoryResponse
 
 
@@ -14,7 +15,6 @@ class ProductBase(BaseModel):
 
     price: float = Field(gt=0, description='Product price')
     category_id: int = Field(description='Category ID')
-
     image_url: str | None = Field(
         default=None,
         description='Product image url')
@@ -63,7 +63,7 @@ class ProductResponse(BaseModel):
         default=None,
         description='Product description'
     )
-    price: float = Field(description='Product price')
+    price: Decimal = Field(description='Product price')
 
     image_url: str | None = Field(
         default=None,

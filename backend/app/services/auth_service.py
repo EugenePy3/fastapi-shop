@@ -31,7 +31,7 @@ class AuthService:
         user = await self.db.users.get_user_by_name(name)
 
         if not user or not security.verify_password(password, user.password_hash):
-            raise InvalidCredentialsError('Invalid username or password')
+            raise InvalidCredentialsError('Invalid username or password.')
 
         raw_token, token_hash = tokens.generate_session_token()
 
@@ -63,5 +63,6 @@ class AuthService:
 
         if stored:
             await self.db.delete(stored)
+            await self.db.flush()
 
 

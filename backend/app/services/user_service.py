@@ -13,7 +13,7 @@ class UserService:
         existing = await self.db.users.get_user_by_name(name)
 
         if existing:
-            raise UserAlreadyExistsError('User already exists')
+            raise UserAlreadyExistsError('User already exists.')
 
         user = await self.db.users.create_user(
             name=name,

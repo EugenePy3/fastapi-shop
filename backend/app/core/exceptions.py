@@ -40,7 +40,7 @@ class SessionExpiredError(UnauthorizedError):
 
 
 class MissingSessionCookieError(UnauthorizedError):
-    """Session cookie not found"""
+    """Session cookie not found."""
 
 
 # --- 403 Forbidden ---

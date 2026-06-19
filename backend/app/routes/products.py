@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status
 
-from ..dependencies import require_admin, DBManagerDep
+from ..dependencies import require_admin, DBManagerDep, AdminUserDep
 from ..models.user import User
 from ..services.product_service import ProductService
 from ..schemas.product import ProductResponse, ProductListResponse, ProductCreate, ProductUpdate
@@ -48,7 +48,7 @@ async def get_products_by_category(category_id: int, db: DBManagerDep):
 async def create_product(
         product_data: ProductCreate,
         db: DBManagerDep,
-        admin: User = Depends(require_admin)
+        admin: AdminUserDep,
 ):
     service = ProductService(db)
 
@@ -60,7 +60,7 @@ async def update_product(
         product_id: int,
         update_data: ProductUpdate,
         db: DBManagerDep,
-        admin: User = Depends(require_admin)
+        admin: AdminUserDep,
 ):
     service = ProductService(db)
 
@@ -71,7 +71,7 @@ async def update_product(
 async def remove_product(
         product_id: int,
         db: DBManagerDep,
-        admin: User = Depends(require_admin)
+        admin: AdminUserDep,
 ):
     service = ProductService(db)
 

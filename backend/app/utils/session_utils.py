@@ -16,7 +16,7 @@ def get_session_token_hash(request: Request) -> str:
     raw_token = request.cookies.get(settings.session_cookie_name)
 
     if not raw_token:
-        raise MissingSessionCookieError('Session cookie bot found')
+        raise MissingSessionCookieError('Session cookie not found.')
     return tokens.hash_session_token(raw_token)
 
 

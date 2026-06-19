@@ -13,7 +13,7 @@ router = APIRouter(
 @router.get('', response_model=CartResponse, status_code=status.HTTP_200_OK)
 async def get_cart(
         db: DBManagerDep,
-        user: User = CurrentUserDep,
+        user: CurrentUserDep,
 ):
     service = CartService(db)
     return await service.get_cart(user.id)
@@ -23,7 +23,7 @@ async def get_cart(
 async def add_to_cart(
         item: CartItemCreate,
         db: DBManagerDep,
-        user: User = CurrentUserDep
+        user: CurrentUserDep
 ):
     service = CartService(db)
     return await service.add_to_cart(
@@ -38,7 +38,7 @@ async def update_cart_item(
         product_id: int,
         item: CartItemUpdate,
         db: DBManagerDep,
-        user: User = CurrentUserDep,
+        user: CurrentUserDep,
 ):
     service = CartService(db)
     return await service.update_item_quantity(
@@ -52,7 +52,7 @@ async def update_cart_item(
 async def remove_cart_item(
         product_id: int,
         db: DBManagerDep,
-        user: User = CurrentUserDep,
+        user: CurrentUserDep,
 ):
     service = CartService(db)
 
@@ -65,7 +65,7 @@ async def remove_cart_item(
 @router.delete('', status_code=status.HTTP_204_NO_CONTENT)
 async def clear_cart(
         db: DBManagerDep,
-        user: User = CurrentUserDep,
+        user: CurrentUserDep,
 ):
     service = CartService(db)
 

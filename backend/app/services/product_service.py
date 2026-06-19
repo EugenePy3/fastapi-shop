@@ -35,9 +35,10 @@ class ProductService:
         category = await self.categories.get_by_id(data.category_id)
 
         if not category:
-            raise CategoryNotFoundError(f'Category with id {data.category_id} not found')
+            raise CategoryNotFoundError(f'Category with id {data.category_id} not found.')
 
         product = await self.products.create(data)
+        product.category = category
 
         await self.db.flush()
 

@@ -42,7 +42,7 @@ class SessionService:
         )
 
         if not session_record:
-            raise SessionNotFoundError('Session not found')
+            raise SessionNotFoundError('Session not found.')
 
         return session_record
 
@@ -54,7 +54,7 @@ class SessionService:
         if not user:
             await self.expire_session(
                 session_record,
-                "User not found"
+                "User not found."
             )
         return user
 
@@ -67,7 +67,7 @@ class SessionService:
         absolute_expires_at = absolute_deadline(session_record)
 
         if now >= absolute_expires_at:
-            await self.expire_session(session_record, "Session expired")
+            await self.expire_session(session_record, "Session expired.")
         return absolute_expires_at
 
     #  Проверяем обычное истечение срока действия (expires_at)
@@ -77,7 +77,7 @@ class SessionService:
     ) -> None:
 
         if session_record.expires_at <= now:
-            await self.expire_session(session_record, "Session expired")
+            await self.expire_session(session_record, "Session expired.")
 
     async def extend_if_needed(
             self,

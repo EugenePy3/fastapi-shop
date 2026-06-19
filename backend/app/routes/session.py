@@ -51,7 +51,7 @@ async def logout_session(
     clear_session_cookie(response)
 
     return MessageResponse(
-        detail='Logged out'
+        detail='Logged out...'
     )
 
 

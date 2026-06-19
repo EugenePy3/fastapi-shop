@@ -1,6 +1,9 @@
-from sqlalchemy import ForeignKey
+from datetime import datetime, timezone
+
+from sqlalchemy import ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from datetime import datetime
+
+
 from ..database import Base
 
 
@@ -13,7 +16,11 @@ class Cart(Base):
         ForeignKey('users.id', ondelete='CASCADE'),
         unique=True
     )
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc)
+    )
 
     user: Mapped['User'] = relationship(back_populates='cart')
 
