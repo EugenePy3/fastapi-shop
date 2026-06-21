@@ -9,17 +9,20 @@ class CategoryService:
         self.db = db
         self.categories = db.categories
 
-    async def get_all_categories(self) -> list[Category]:
-        return await self.categories.get_all()
-
-    async def get_category_by_id(self, category_id: int) -> Category:
+    async def _get_category_or_raise(self, category_id: int):
         category = await self.categories.get_by_id(category_id)
 
         if not category:
             raise CategoryNotFoundError(
                 f'Category with id {category_id} not found.'
             )
+        return category
 
+    async def get_all_categories(self) -> list[Category]:
+        return await self.categories.get_all()
+
+    async def get_category_by_id(self, category_id: int) -> Category:
+        category = await self._get_category_or_raise(category_id)
         return category
 
     async def get_category_by_slug(self, slug: str) -> Category:
@@ -29,7 +32,6 @@ class CategoryService:
             raise CategoryNotFoundError(
                 f'Category with slug {slug} not found'
             )
-
         return category
 
     async def create_category(self, data: CategoryCreate) -> Category:
@@ -43,16 +45,10 @@ class CategoryService:
 
         await self.db.flush()
         await self.db.refresh(category)
-
         return category
 
     async def update_category(self, category_id: int, data: CategoryUpdate) -> Category:
-        category = await self.categories.get_by_id(category_id)
-
-        if not category:
-            raise CategoryNotFoundError(
-                f'Category with id {category_id} not found'
-            )
+        category = await self._get_category_or_raise(category_id)
 
         if data.slug:
             existing = await self.categories.get_by_slug(data.slug)
@@ -72,20 +68,15 @@ class CategoryService:
         return category
 
     async def remove_category(self, category_id: int) -> None:
-        category = await self.categories.get_by_id(category_id)
-
-        if not category:
-            raise CategoryNotFoundError(
-                f'Category with id {category_id} not found'
-            )
-
+        category = await self._get_category_or_raise(category_id)
         product_count = await self.categories.count_products_by_category(category_id)
 
         if product_count > 0:
             raise CategoryDeleteError(
-                f'Cannot delete category: {product_count} products still assigned'
+                f'Cannot delete category: {product_count}. products still assigned'
             )
 
         await self.db.delete(category)
         await self.db.flush()
+
 

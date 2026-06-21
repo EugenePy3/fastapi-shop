@@ -1,6 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
+
+
 from ..models.product import Product
 from ..schemas.product import ProductCreate
 
@@ -12,7 +14,7 @@ class ProductRepository:
     async def get_all(self) -> list[Product]:
         stmt = (
             select(Product)
-            .options(joinedload(Product.category))
+            .options(selectinload(Product.category))
         )
         result = await self.session.scalars(stmt)
         return list(result.all())
@@ -26,13 +28,16 @@ class ProductRepository:
         return await self.session.scalar(stmt)
 
     async def get_by_slug(self, slug: str) -> Product | None:
-        stmt = select(Product).where(Product.slug == slug)
+        stmt = (
+            select(Product)
+            .options(joinedload(Product.category))
+            .where(Product.slug == slug))
         return await self.session.scalar(stmt)
 
     async def get_by_category(self, category_id: int) -> list[Product]:
         stmt = (
             select(Product)
-            .options(joinedload(Product.category))
+            .options(selectinload(Product.category))
             .where(Product.category_id == category_id)
         )
         result = await self.session.scalars(stmt)
@@ -46,9 +51,8 @@ class ProductRepository:
     async def get_multiple_by_ids(self, product_ids: list[int]) -> list[Product]:
         stmt = (
             select(Product)
-            .options(joinedload(Product.category))
+            .options(selectinload(Product.category))
             .where(Product.id.in_(product_ids))
         )
-        result = await self.session.execute(stmt)
-        return list(result.scalars().all())
-
+        result = await self.session.scalars(stmt)
+        return list(result.all())

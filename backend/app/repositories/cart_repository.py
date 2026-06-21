@@ -1,6 +1,8 @@
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
+
+
 from ..models.cart import Cart, CartItem
 
 
@@ -21,7 +23,6 @@ class CartRepository:
     async def create_cart(self, user_id: int) -> Cart:
         cart = Cart(user_id=user_id)
         self.session.add(cart)
-
         return cart
 
     async def get_or_create_cart(self, user_id: int) -> Cart:
@@ -29,7 +30,6 @@ class CartRepository:
 
         if cart:
             return cart
-
         return await self.create_cart(user_id)
 
     async def get_item(self, cart_id: int, product_id: int) -> CartItem | None:
@@ -47,7 +47,6 @@ class CartRepository:
             quantity=quantity,
         )
         self.session.add(item)
-        
         return item
 
     async def clear_cart(self, cart_id: int) -> None:

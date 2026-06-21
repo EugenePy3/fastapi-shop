@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import delete
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from ..models.user import UserSession
 
 
@@ -17,7 +18,6 @@ class SessionRepository:
             expires_at=expires_at,
         )
         self.session.add(session_record)
-
         return session_record
 
     async def get_by_hash(self, token_hash: str) -> UserSession | None:
@@ -25,7 +25,6 @@ class SessionRepository:
             select(UserSession)
             .where(UserSession.token_hash == token_hash)
         )
-
         return await self.session.scalar(stmt)
 
     async def remove_expired(self) -> None:

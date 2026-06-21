@@ -43,12 +43,13 @@ class OrderRepository:
 
         return order
 
-    async def add_item(self,
-                       order_id: int,
-                       product_id: int,
-                       product_name: str,
-                       product_price: float,
-                       quantity: int) -> OrderItem:
+    async def add_item(
+            self,
+            order_id: int,
+            product_id: int,
+            product_name: str,
+            product_price: float,
+            quantity: int) -> OrderItem:
         item = OrderItem(
             order_id=order_id,
             product_id=product_id,
@@ -57,7 +58,6 @@ class OrderRepository:
             quantity=quantity,
         )
         self.session.add(item)
-
         return item
 
     async def update_status(self, order: Order, status: str) -> Order:

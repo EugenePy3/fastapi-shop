@@ -33,7 +33,6 @@ class CategoryRepository:
     async def create(self, category_data: CategoryCreate) -> Category:
         category = Category(**category_data.model_dump())
         self.session.add(category)
-
         return category
 
     async def count_products_by_category(self, category_id: int) -> int:

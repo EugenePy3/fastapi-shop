@@ -67,12 +67,11 @@ async def update_product(
     return await service.update_product(product_id, update_data)
 
 
-@router.delete('/{product_id}', response_model=ProductResponse, status_code=status.HTTP_200_OK)
+@router.delete('/{product_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def remove_product(
         product_id: int,
         db: DBManagerDep,
         admin: AdminUserDep,
 ):
     service = ProductService(db)
-
-    return await service.remove_product(product_id)
+    await service.remove_product(product_id)
