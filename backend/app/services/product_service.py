@@ -21,14 +21,14 @@ class ProductService:
         product = await self.products.get_by_id(product_id)
 
         if not product:
-            raise ProductNotFoundError(f'Product with id {product_id} not found')
+            raise ProductNotFoundError(f"Product with id '{product_id}' not found")
         return product
 
     async def _get_category_or_raise(self, category_id: int) -> Category:
         category = await self.categories.get_by_id(category_id)
 
         if not category:
-            raise CategoryNotFoundError(f'Category with id {category_id} not found')
+            raise CategoryNotFoundError(f"Category with id '{category_id}' not found")
         return category
 
     async def get_all_products(self) -> list[Product]:

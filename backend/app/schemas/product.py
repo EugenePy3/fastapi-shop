@@ -1,8 +1,9 @@
 from pydantic import BaseModel, Field, ConfigDict
-
 from datetime import datetime
-from decimal import Decimal
+
+
 from .category import CategoryResponse
+from .types import PriceType
 
 
 class ProductBase(BaseModel):
@@ -13,7 +14,7 @@ class ProductBase(BaseModel):
         description='Product description'
     )
 
-    price: float = Field(gt=0, description='Product price')
+    price: PriceType = Field(description='Product price')
     category_id: int = Field(description='Category ID')
     image_url: str | None = Field(
         default=None,
@@ -35,9 +36,8 @@ class ProductUpdate(BaseModel):
         default=None,
         description='Update product description'
     )
-    price: float | None = Field(
+    price: PriceType | None = Field(
         default=None,
-        gt=0,
         description='Update product price'
     )
     category_id: int | None = Field(
@@ -63,7 +63,7 @@ class ProductResponse(BaseModel):
         default=None,
         description='Product description'
     )
-    price: Decimal = Field(description='Product price')
+    price: PriceType = Field(description='Product price')
 
     image_url: str | None = Field(
         default=None,

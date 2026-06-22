@@ -1,3 +1,5 @@
+from sqlalchemy.exc import IntegrityError
+
 from ..core.db_manager import DBManager
 from ..core.exceptions import CategoryNotFoundError, CategoryDeleteError, CategoryAlreadyExistsError
 from ..models import Category
@@ -9,12 +11,21 @@ class CategoryService:
         self.db = db
         self.categories = db.categories
 
-    async def _get_category_or_raise(self, category_id: int):
+    async def _get_category_or_raise(self, category_id: int) -> Category:
         category = await self.categories.get_by_id(category_id)
 
         if not category:
             raise CategoryNotFoundError(
-                f'Category with id {category_id} not found.'
+                f"Category with id '{category_id}' not found."
+            )
+        return category
+
+    async def _get_category_by_slug_or_raise(self, slug: str) -> Category:
+        category = await self.categories.get_by_slug(slug)
+
+        if not category:
+            raise CategoryNotFoundError(
+                f"Category with id '{slug} 'not found."
             )
         return category
 
@@ -26,44 +37,33 @@ class CategoryService:
         return category
 
     async def get_category_by_slug(self, slug: str) -> Category:
-        category = await self.categories.get_by_slug(slug)
-
-        if not category:
-            raise CategoryNotFoundError(
-                f'Category with slug {slug} not found'
-            )
+        category = await self._get_category_by_slug_or_raise(slug)
         return category
 
     async def create_category(self, data: CategoryCreate) -> Category:
-        existing = await self.categories.get_by_slug(data.slug)
-
-        if existing:
-            raise CategoryAlreadyExistsError(
-                f'Category with slug {data.slug} already exists'
-            )
         category = await self.categories.create(data)
 
-        await self.db.flush()
-        await self.db.refresh(category)
+        try:
+            await self.db.flush()
+        except IntegrityError as exc:
+            raise CategoryAlreadyExistsError(
+                f"Category with slug '{data.slug}' already exists"
+            ) from exc
         return category
 
     async def update_category(self, category_id: int, data: CategoryUpdate) -> Category:
         category = await self._get_category_or_raise(category_id)
 
-        if data.slug:
-            existing = await self.categories.get_by_slug(data.slug)
-            if existing and existing.id != category_id:
-                raise CategoryAlreadyExistsError(
-                    f'Category with slug {data.slug} already exists'
-                )
+        updates = data.model_dump(exclude_unset=True)
+        for field, value in updates.items():
+            setattr(category, field, value)
 
-        if data.name is not None:
-            category.name = data.name
-        if data.slug is not None:
-            category.slug = data.slug
-
-        await self.db.flush()
-        await self.db.refresh(category)
+        try:
+            await self.db.flush()
+        except IntegrityError as exc:
+            raise CategoryAlreadyExistsError(
+                f"Category with slug '{data.slug}' already exists"
+            ) from exc
 
         return category
 
@@ -73,7 +73,7 @@ class CategoryService:
 
         if product_count > 0:
             raise CategoryDeleteError(
-                f'Cannot delete category: {product_count}. products still assigned'
+                f"Cannot delete category: '{product_count}'. products still assigned"
             )
 
         await self.db.delete(category)

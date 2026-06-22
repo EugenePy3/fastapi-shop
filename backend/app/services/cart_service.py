@@ -9,6 +9,13 @@ class CartService:
         self.carts = db.carts
         self.products = db.products
 
+    async def _get_item_or_raise(self, cart_id: int, product_id: int) -> CartItem:
+        item = await self.carts.get_item(cart_id, product_id)
+
+        if not item:
+            raise CartItemNotFoundError(f'Product with id {product_id} not found in cart')
+        return item
+
     async def add_to_cart(self, user_id: int, product_id: int, quantity: int) -> CartItem:
         cart = await self.carts.get_or_create_cart(user_id)
         product = await self.products.get_by_id(product_id)
@@ -22,6 +29,8 @@ class CartService:
         )
         if item:
             item.quantity += quantity
+            if item.quantity <= 0:
+                await self.db.delete(item)
             return item
 
         return await self.carts.add_item(
@@ -35,25 +44,13 @@ class CartService:
 
     async def update_item_quantity(self, user_id: int, product_id: int, quantity: int) -> CartItem:
         cart = await self.carts.get_or_create_cart(user_id)
-        item = await self.carts.get_item(
-            cart.id,
-            product_id
-        )
-        if not item:
-            raise CartItemNotFoundError(f'Product with id {item.product_id} not found in cart')
+        item = await self._get_item_or_raise(cart.id, product_id)
         item.quantity = quantity
-
         return item
 
     async def remove_item(self, user_id: int, product_id: int) -> None:
         cart = await self.carts.get_or_create_cart(user_id)
-        item = await self.carts.get_item(
-            cart.id,
-            product_id
-        )
-        if not item:
-            raise CartItemNotFoundError(f'Product with id {product_id} not found in cart')
-
+        item = await self._get_item_or_raise(cart.id, product_id)
         await self.db.delete(item)
 
     async def clear_cart(self, user_id: int) -> None:

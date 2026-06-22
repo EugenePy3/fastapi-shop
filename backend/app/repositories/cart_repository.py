@@ -1,6 +1,6 @@
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
 
 from ..models.cart import Cart, CartItem
@@ -15,8 +15,8 @@ class CartRepository:
             select(Cart)
             .where(Cart.user_id == user_id)
             .options(
-                joinedload(Cart.items)
-                .joinedload(CartItem.product))
+                selectinload(Cart.items)
+                .selectinload(CartItem.product))
         )
         return await self.session.scalar(stmt)
 

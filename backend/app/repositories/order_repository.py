@@ -1,6 +1,7 @@
-from sqlalchemy import select
+from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
+
 from ..models.order import Order, OrderItem
 
 
@@ -59,6 +60,17 @@ class OrderRepository:
         )
         self.session.add(item)
         return item
+
+    async def add_items_bulk(self, order_id: int, items: list[dict]) -> None:
+        data = [
+            {
+                "order_id": order_id,
+                **item
+            }
+            for item in items
+        ]
+        stmt = insert(OrderItem).values(data)
+        await self.session.execute(stmt)
 
     async def update_status(self, order: Order, status: str) -> Order:
         order.status = status
