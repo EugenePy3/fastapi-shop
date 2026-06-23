@@ -4,7 +4,7 @@
 Полнофункциональный backend для интернет-магазина на **FastAPI**, **PostgreSQL** и **Docker**.  
 Проект демонстрирует подход к построению backend-приложений с использованием многослойной архитектуры, паттернов Repository, Service и Unit of Work, доменных исключений, eager loading и сессионной аутентификации.
 
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)](https://www.docker.com/)
@@ -17,7 +17,8 @@
 - **Строгая типизация** и валидация через Pydantic V2
 - **Сессионная аутентификация** с разделением прав (admin / user)
 - **Защита от N+1** с помощью `selectinload` / `joinedload` на уровне репозиториев
-- **Пагинация** и корректный подсчёт общего количества записей (`skip/limit`)
+- **Unit of Work** (DBManager) для управления транзакциями и репозиториями
+- **Repository Pattern и Service Layer** для разделения доступа к данным и бизнес-логики
 - **Контейнеризация** (Docker Compose) и лёгкий запуск одной командой
 
 ## 📁 Структура проекта
@@ -127,13 +128,14 @@ PostgreSQL
 1. Клонируйте репозиторий:
 
    ```bash
-   git clone https://github.com/your-username/fastapi-shop.git
+   git clone https://github.com/EugenePy3/fastapi-shop.git
    cd fastapi-shop
    
 2. Запустите контейнеры:
 
     ```bash
     docker-compose up -d
+    ```
 
    Приложение будет доступно по адресу: http://localhost:8000
 
