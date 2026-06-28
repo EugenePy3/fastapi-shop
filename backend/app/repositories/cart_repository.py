@@ -2,7 +2,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-
+from ..models import Product
 from ..models.cart import Cart, CartItem
 
 
@@ -25,25 +25,19 @@ class CartRepository:
         self.session.add(cart)
         return cart
 
-    async def get_or_create_cart(self, user_id: int) -> Cart:
-        cart = await self.get_by_user_id(user_id)
-
-        if cart:
-            return cart
-        return await self.create_cart(user_id)
-
     async def get_item(self, cart_id: int, product_id: int) -> CartItem | None:
         stmt = (
             select(CartItem)
+            .options(selectinload(CartItem.product))
             .where(CartItem.cart_id == cart_id)
             .where(CartItem.product_id == product_id)
         )
         return await self.session.scalar(stmt)
 
-    async def add_item(self, cart_id: int, product_id: int, quantity: int) -> CartItem:
+    async def add_item(self, cart_id: int, product: Product, quantity: int) -> CartItem:
         item = CartItem(
             cart_id=cart_id,
-            product_id=product_id,
+            product=product,
             quantity=quantity,
         )
         self.session.add(item)

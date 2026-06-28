@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 from .category import CategoryResponse
-from .types import PriceType
+from .types import PositivePrice, Money
 
 
 class ProductBase(BaseModel):
@@ -14,7 +14,7 @@ class ProductBase(BaseModel):
         description='Product description'
     )
 
-    price: PriceType = Field(description='Product price')
+    price: PositivePrice = Field(description='Product price')
     category_id: int = Field(description='Category ID')
     image_url: str | None = Field(
         default=None,
@@ -36,7 +36,7 @@ class ProductUpdate(BaseModel):
         default=None,
         description='Update product description'
     )
-    price: PriceType | None = Field(
+    price: PositivePrice | None = Field(
         default=None,
         description='Update product price'
     )
@@ -63,7 +63,7 @@ class ProductResponse(BaseModel):
         default=None,
         description='Product description'
     )
-    price: PriceType = Field(description='Product price')
+    price: PositivePrice = Field(description='Product price')
 
     image_url: str | None = Field(
         default=None,

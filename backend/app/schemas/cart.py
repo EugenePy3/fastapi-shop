@@ -1,9 +1,7 @@
-from decimal import Decimal
-
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
-from app.schemas.types import PriceType
+from app.schemas.types import Money
 
 
 class CartItemCreate(BaseModel):
@@ -36,13 +34,13 @@ class CartItemResponse(BaseModel):
     name: str = Field(
         description='Product name'
     )
-    price: PriceType = Field(
+    price: Money = Field(
         description='Product price'
     )
     quantity: int = Field(
         description='Quantity in cart'
     )
-    subtotal: float = Field(
+    subtotal: Money = Field(
         description='Total price for this item (price * quantity)'
     )
     image_url: str | None = Field(
@@ -63,7 +61,7 @@ class CartResponse(BaseModel):
     items: list[CartItemResponse] = Field(
         description='List of item in cart'
     )
-    total: float = Field(
+    total: Money = Field(
         description='Total cart price'
     )
     items_count: int = Field(

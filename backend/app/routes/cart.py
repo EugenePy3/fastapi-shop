@@ -1,8 +1,12 @@
-from fastapi import APIRouter, Depends, status
-from ..models import User
+from fastapi import APIRouter,  status
+
 from ..services.cart_service import CartService
 from ..schemas.cart import CartItemCreate, CartItemUpdate, CartResponse, CartItemResponse
-from ..dependencies import get_current_user_from_session, DBManagerDep, CurrentUserDep
+from ..dependencies import DBManagerDep, CurrentUserDep
+from app.mappers import (
+    to_cart_response,
+    to_cart_item_response,
+)
 
 router = APIRouter(
     prefix='/api/cart',
@@ -16,7 +20,8 @@ async def get_cart(
         user: CurrentUserDep,
 ):
     service = CartService(db)
-    return await service.get_cart(user.id)
+    cart = await service.get_cart(user.id)
+    return to_cart_response(cart)
 
 
 @router.post('/items', response_model=CartItemResponse, status_code=status.HTTP_200_OK)
@@ -26,11 +31,12 @@ async def add_to_cart(
         user: CurrentUserDep
 ):
     service = CartService(db)
-    return await service.add_to_cart(
+    item = await service.add_to_cart(
         user.id,
         item.product_id,
         item.quantity,
     )
+    return to_cart_item_response(item)
 
 
 @router.patch('/items/{product_id}', response_model=CartItemResponse, status_code=status.HTTP_200_OK)
@@ -41,11 +47,12 @@ async def update_cart_item(
         user: CurrentUserDep,
 ):
     service = CartService(db)
-    return await service.update_item_quantity(
+    item = await service.update_item_quantity(
         user.id,
         product_id,
         item.quantity,
     )
+    return to_cart_item_response(item)
 
 
 @router.delete('/items/{product_id}', status_code=status.HTTP_204_NO_CONTENT)

@@ -1,10 +1,8 @@
-from decimal import Decimal
-
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
 from app.enums.order_status import OrderStatus
-from app.schemas.types import PriceType
+from app.schemas.types import PositivePrice, Money
 
 
 class OrderItemResponse(BaseModel):
@@ -19,13 +17,13 @@ class OrderItemResponse(BaseModel):
     product_name: str = Field(
         description='Product name snapshot'
     )
-    product_price: PriceType = Field(
+    product_price: PositivePrice = Field(
         description='Product price snapshot'
     )
     quantity: int = Field(
         description='Quantity'
     )
-    subtotal: float = Field(
+    subtotal: Money = Field(
         description='Subtotal for item'
     )
 
@@ -42,7 +40,7 @@ class OrderResponse(BaseModel):
     status: str = Field(
         description='Order status'
     )
-    total_amount: float = Field(
+    total_amount: Money = Field(
         description='Total order amount'
     )
     created_at: datetime = Field(
