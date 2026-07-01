@@ -8,6 +8,7 @@ def to_order_item_response(item: OrderItem) -> OrderItemResponse:
         product_name=item.product_name,
         product_price=item.product_price,
         quantity=item.quantity,
+        subtotal=item.product_price * item.quantity,
     )
 
 

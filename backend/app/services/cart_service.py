@@ -37,9 +37,6 @@ class CartService:
 
         if item:
             item.quantity += quantity
-
-            if item.quantity <= 0:
-                await self.db.delete(item)
             return item
 
         item = await self.carts.add_item(cart.id, product, quantity)

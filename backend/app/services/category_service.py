@@ -25,7 +25,7 @@ class CategoryService:
 
         if not category:
             raise CategoryNotFoundError(
-                f"Category with id '{slug} 'not found."
+                f"Category with '{slug}' not found."
             )
         return category
 

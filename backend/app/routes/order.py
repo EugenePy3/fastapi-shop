@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
+from app.mappers.order_mapper import (
+    to_order_response,
+    to_order_list_response,
+)
 
-from ..dependencies import DBManagerDep, get_current_user_from_session, require_admin, CurrentUserDep, AdminUserDep
-from ..models import User
+from ..dependencies import DBManagerDep, CurrentUserDep, AdminUserDep
 from ..schemas.order import OrderResponse, OrderListResponse, OrderStatusUpdate
 from ..services.order_service import OrderService
 
@@ -18,7 +21,8 @@ async def create_order(
 ):
     service = OrderService(db)
 
-    return await service.create_order_from_cart(user.id)
+    order = await service.create_order_from_cart(user.id)
+    return to_order_response(order)
 
 
 @router.get('', response_model=OrderListResponse, status_code=status.HTTP_200_OK)
@@ -28,10 +32,7 @@ async def get_my_orders(
 ):
     service = OrderService(db)
     orders = await service.get_user_orders(user.id)
-
-    return OrderListResponse(
-        orders=orders
-    )
+    return OrderListResponse(orders=to_order_list_response(orders))
 
 
 @router.get('/{order_id}/status', response_model=OrderResponse, status_code=status.HTTP_200_OK)
@@ -42,10 +43,8 @@ async def get_order(
 ):
     service = OrderService(db)
 
-    return await service.get_order(
-        order_id,
-        user,
-    )
+    order = await service.get_order(order_id, user)
+    return to_order_response(order)
 
 
 @router.patch('order_id/status', response_model=OrderResponse, status_code=status.HTTP_200_OK)
@@ -57,8 +56,6 @@ async def update_order_status(
 ):
     service = OrderService(db)
 
-    return await service.update_status(
-        order_id,
-        data.status,
-    )
+    order = await service.update_status(order_id, data.status)
+    return to_order_response(order)
 

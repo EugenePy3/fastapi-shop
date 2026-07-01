@@ -1,6 +1,10 @@
+from ..core.exceptions import (
+    CartNotFoundError,
+    EmptyCartError,
+    OrderNotFoundError,
+    PermissionDeniedError)
+
 from ..core.db_manager import DBManager
-from ..core.exceptions import CartNotFoundError, EmptyCartError, OrderNotFoundError, PermissionDeniedError, \
-    ProductNotFoundError
 from ..enums.order_status import OrderStatus
 from ..models.order import Order
 from ..models.user import User
@@ -48,6 +52,7 @@ class OrderService:
         )
 
         await self.orders.add_items_bulk(order.id, order_items_data)
+
         await self.carts.clear_cart(cart.id)
         await self.db.flush()
         return order
