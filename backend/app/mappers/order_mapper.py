@@ -4,6 +4,7 @@ from app.schemas.order import OrderResponse, OrderItemResponse
 
 def to_order_item_response(item: OrderItem) -> OrderItemResponse:
     return OrderItemResponse(
+        id=item.id,
         product_id=item.product_id,
         product_name=item.product_name,
         product_price=item.product_price,

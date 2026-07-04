@@ -55,6 +55,8 @@ class OrderService:
 
         await self.carts.clear_cart(cart.id)
         await self.db.flush()
+
+        order = await self.orders.get_by_id_with_items(order.id)
         return order
 
     async def get_order(self, order_id: int, current_user: User) -> Order:

@@ -1,6 +1,6 @@
 from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
 from ..models.order import Order, OrderItem
 
@@ -71,6 +71,14 @@ class OrderRepository:
         ]
         stmt = insert(OrderItem).values(data)
         await self.session.execute(stmt)
+
+    async def get_by_id_with_items(self, order_id: int) -> Order | None:
+        stmt = (
+            select(Order)
+            .where(Order.id == order_id)
+            .options(selectinload(Order.items))
+        )
+        return await self.session.scalar(stmt)
 
     async def update_status(self, order: Order, status: str) -> Order:
         order.status = status

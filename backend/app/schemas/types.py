@@ -18,5 +18,6 @@ Money = Annotated[
         ge=0,
         max_digits=10,
         decimal_places=2,
+        examples=[999.99],
     )
 ]
