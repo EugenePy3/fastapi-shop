@@ -1,7 +1,9 @@
-from sqlalchemy import select, insert
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload
+from decimal import Decimal
 
+from ..models.cart import CartItem
 from ..models.order import Order, OrderItem
 
 
@@ -34,51 +36,27 @@ class OrderRepository:
 
         return list(result.scalars().unique().all())
 
-    async def create_order(self, user_id: int, total_amount: float) -> Order:
+    async def create_order(self, user_id: int, total_amount: Decimal) -> Order:
         order = Order(
             user_id=user_id,
             total_amount=total_amount,
         )
         self.session.add(order)
-        await self.session.flush()
-
         return order
 
-    async def add_item(
+    def add_item(
             self,
-            order_id: int,
-            product_id: int,
-            product_name: str,
-            product_price: float,
-            quantity: int) -> OrderItem:
+            order: Order,
+            cart_item: CartItem,
+    ) -> OrderItem:
         item = OrderItem(
-            order_id=order_id,
-            product_id=product_id,
-            product_name=product_name,
-            product_price=product_price,
-            quantity=quantity,
+            product_id=cart_item.product.id,
+            product_name=cart_item.product.name,
+            product_price=cart_item.product.price,
+            quantity=cart_item.quantity,
         )
-        self.session.add(item)
+        order.items.append(item)
         return item
-
-    async def add_items_bulk(self, order_id: int, items: list[dict]) -> None:
-        data = [
-            {
-                "order_id": order_id,
-                **item
-            }
-            for item in items
-        ]
-        stmt = insert(OrderItem).values(data)
-        await self.session.execute(stmt)
-
-    async def get_by_id_with_items(self, order_id: int) -> Order | None:
-        stmt = (
-            select(Order)
-            .where(Order.id == order_id)
-            .options(selectinload(Order.items))
-        )
-        return await self.session.scalar(stmt)
 
     async def update_status(self, order: Order, status: str) -> Order:
         order.status = status

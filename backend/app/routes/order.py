@@ -47,7 +47,7 @@ async def get_order(
     return to_order_response(order)
 
 
-@router.patch('order_id/status', response_model=OrderResponse, status_code=status.HTTP_200_OK)
+@router.patch('/{order_id}/status', response_model=OrderResponse, status_code=status.HTTP_200_OK)
 async def update_order_status(
         order_id: int,
         data: OrderStatusUpdate,

@@ -31,19 +31,9 @@ class OrderService:
         if not cart.items:
             raise EmptyCartError('Cannot create an order because your cart is empty.')
 
-        order_items_data = [
-            {
-                'product_id': item.product.id,
-                'product_name': item.product.name,
-                'product_price': item.product.price,
-                'quantity': item.quantity,
-            }
-            for item in cart.items
-        ]
-
         total_amount = sum(
-            item['product_price'] * item['quantity']
-            for item in order_items_data
+            item.product.price * item.quantity
+            for item in cart.items
         )
 
         order = await self.orders.create_order(
@@ -51,12 +41,11 @@ class OrderService:
             total_amount=total_amount
         )
 
-        await self.orders.add_items_bulk(order.id, order_items_data)
+        for cart_item in cart.items:
+            self.orders.add_item(order, cart_item)
 
         await self.carts.clear_cart(cart.id)
         await self.db.flush()
-
-        order = await self.orders.get_by_id_with_items(order.id)
         return order
 
     async def get_order(self, order_id: int, current_user: User) -> Order:
