@@ -7,7 +7,6 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.exceptions import AppError
 from app.core.handlers import app_error_handler
-from app.database import init_db
 
 from app.routes import (
     products_router,
@@ -21,7 +20,6 @@ from app.routes import (
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    await init_db()
     yield
 
 
