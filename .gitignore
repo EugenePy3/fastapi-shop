@@ -28,6 +28,7 @@ pip-delete-this-directory.txt
 .pytest_cache/
 htmlcov/
 .env
+.env.test
 .venv
 env/
 venv/
@@ -76,6 +77,8 @@ coverage
 *.sln
 *.sw?
 shop.db
+shop_test
+
 
 *.tsbuildinfo
 .vscode
