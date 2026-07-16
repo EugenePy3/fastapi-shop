@@ -1,178 +1,65 @@
-def test_register_success(client):
-    response = client.post(
-        '/auth/register',
-        json={
-            "name": 'Eugen',
-            "password": '12345678',
-        },
-    )
-
+def test_register_success(auth_api, user_data):
+    response = auth_api.register(**user_data)
     assert response.status_code == 201
-
     data = response.json()
-
-    assert data['name'] == 'Eugen'
+    assert data['name'] == user_data['name']
     assert isinstance(data['id'], int)
 
 
-def test_register_duplicate_user(client):
-    client.post(
-        '/auth/register',
-        json={
-            'name': 'Eugen',
-            'password': '12345678'
-        },
-    )
-
-    response = client.post(
-        '/auth/register',
-        json={
-            "name": 'Eugen',
-            "password": '12345678',
-        },
-    )
+def test_register_duplicate_user(auth_api, registered_user):
+    response = auth_api.register(**registered_user)
     assert response.status_code == 409
     data = response.json()
+    assert data['detail'] == 'User already exists.'
 
-    assert data['detail'] == 'User already exists'
 
-
-def test_login_success(client):
-    client.post(
-        '/auth/register',
-        json={
-            "name": 'Eugen',
-            "password": '12345678',
-        },
-    )
-
-    response = client.post(
-        '/auth/login',
-        json={
-            "name": 'Eugen',
-            "password": '12345678',
-        },
-    )
-
+def test_login_success(auth_api, registered_user):
+    response = auth_api.login(**registered_user)
     assert response.status_code == 200
-
     data = response.json()
-
     assert data['user']['id'] > 0
-    assert data['user']['name'] == 'Eugen'
+    assert data['user']['name'] == registered_user['name']
     assert response.cookies.get('session_id') is not None
 
 
-def test_login_invalid_password(client):
-    client.post(
-        '/auth/register',
-        json={
-            'name': 'Eugen',
-            'password': '12345678',
-        },
-    )
-
-    response = client.post(
-        '/auth/login',
-        json={
-            'name': 'Eugen',
-            'password': 'wrong_password',
-        },
-    )
+def test_login_invalid_password(auth_api, registered_user):
+    response = auth_api.login(
+            name=registered_user['name'],
+            password='wrong_password')
 
     assert response.status_code == 401
-
     data = response.json()
-
     assert data['detail'] == 'Invalid username or password.'
     assert response.cookies.get('session_id') is None
 
 
-def test_logout(client):
-    client.post(
-        '/auth/register',
-        json={
-            'name': 'Eugen',
-            'password': '12345678',
-        },
-    )
-
-    login_response = client.post(
-        '/auth/login',
-        json={
-            'name': 'Eugen',
-            'password': '12345678',
-        },
-    )
-
-    assert login_response.cookies.get('session_id') is not None
-
-    response = client.post('/auth/logout')
-
+def test_logout(authenticated_api):
+    response = authenticated_api.logout()
     assert response.status_code == 200
-
     data = response.json()
-
     assert data['detail'] == 'Logged out...'
-    assert response.cookies.get('session_id') == ''
+    assert response.cookies.get('session_id') is None
 
 
-def test_me_session(client):
-    client.post(
-        '/auth/register',
-        json={
-            'name': 'Eugen',
-            'password': '12345678',
-        },
-    )
-
-    client.post(
-        '/auth/login',
-        json={
-            'name': 'Eugen',
-            'password': '12345678',
-        },
-    )
-
-    response = client.get('/auth/me')
-
+def test_me_returns_current_user(authenticated_api, registered_user):
+    response = authenticated_api.me()
     assert response.status_code == 200
-
     data = response.json()
-
     assert data['id'] > 0
-    assert data['name'] == 'Eugen'
+    assert data['name'] == registered_user['name']
 
 
-def test_session_lifecycle(client):
-    client.post(
-        '/auth/register',
-        json={
-            'name': 'Eugen',
-            'password': '12345678',
-        },
-    )
-
-    login_response = client.post(
-        '/auth/login',
-        json={
-            'name': 'Eugen',
-            'password': '12345678',
-        },
-    )
-
+def test_session_lifecycle(auth_api, registered_user):
+    login_response = auth_api.login(**registered_user)
     assert login_response.status_code == 200
     assert login_response.cookies.get('session_id') is not None
 
-    me_response = client.get('/auth/me')
-
+    me_response = auth_api.me()
     assert me_response.status_code == 200
-    assert me_response.json()['name'] == 'Eugen'
+    assert me_response.json()['name'] == registered_user['name']
 
-    logout_response = client.post('/auth/logout')
-
+    logout_response = auth_api.logout()
     assert logout_response.status_code == 200
 
-    me_response_after_logout = client.get('/auth/me')
-
+    me_response_after_logout = auth_api.me()
     assert me_response_after_logout.status_code == 401

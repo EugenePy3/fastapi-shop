@@ -1,25 +1,27 @@
+import os
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    app_name: str = "FastAPI Shop"
+    app_name: str = 'FastAPI Shop'
     debug: bool = True
 
     database_url: str = Field(
-        default="postgresql+asyncpg://user:password@localhost:5432/shop",
-        validation_alias="DATABASE_URL",
+        default='postgresql+asyncpg://user:password@localhost:5432/shop',
+        validation_alias='DATABASE_URL',
     )
 
     cors_origins: list[str] = Field(default_factory=lambda: [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:3000',
     ])
 
-    static_dir: str = "static"
-    images_dir: str = "static/images"
+    static_dir: str = 'static'
+    images_dir: str = 'static/images'
 
     # --- Session ---
     session_ttl_minutes: int = 60 * 24
@@ -31,16 +33,17 @@ class Settings(BaseSettings):
     session_cookie_secure: bool = not debug
     session_cookie_domain: str | None = None
 
-    access_cookie_name: str = "access_token"
-    refresh_cookie_name: str = "refresh_token"
+    access_cookie_name: str = 'access_token'
+    refresh_cookie_name: str = 'refresh_token'
 
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
+        env_file=os.getenv('ENV_FILE', '.env'),
+        env_file_encoding='utf-8',
         case_sensitive=False,
-        extra="ignore",
+        extra='ignore',
     )
 
 
 settings = Settings()
+print('DATABASE =', settings.database_url)
 
