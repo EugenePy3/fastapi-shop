@@ -9,7 +9,6 @@ class Settings(BaseSettings):
     debug: bool = True
 
     database_url: str = Field(
-        default='postgresql+asyncpg://user:password@localhost:5432/shop',
         validation_alias='DATABASE_URL',
     )
 
@@ -45,5 +44,5 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-print('DATABASE =', settings.database_url)
+
 
