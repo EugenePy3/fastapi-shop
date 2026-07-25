@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 from .category import CategoryResponse
-from .types import PositivePrice, Money
+from .types import PositivePrice
 
 
 class ProductBase(BaseModel):

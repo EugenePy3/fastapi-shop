@@ -4,7 +4,8 @@ import subprocess
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text, update
-from tests.database import TestSessionLocal
+
+from tests.api.categories_api import CategoriesApi
 
 from app.main import app
 from app.dependencies import get_db_manager
@@ -12,6 +13,7 @@ from app.core.db_manager import DBManager
 
 from tests.api.auth_api import AuthApi
 from tests.api.cart_api import CartApi
+from tests.api.products_api import ProductsApi
 
 from tests.database import (
     test_engine,
@@ -136,6 +138,7 @@ def products_api(admin_api):
 def category(categories_api):
     response = categories_api.create(
         name='Phones',
+        slug='phones',
     )
     assert response.status_code == 201
     return response.json()
@@ -147,7 +150,6 @@ def product(products_api, category):
         name='iPhone 17',
         description='Test product',
         price=1000,
-        stock=10,
         category_id=category['id'],
         image_url=None,
     )
