@@ -26,7 +26,7 @@ def test_get_category(category, categories_api):
 def test_update_category(category, categories_api):
     response = categories_api.update(
         category['id'],
-        name='Updated Phones',
+        name='updated Phones',
         slug='updated-phones',
     )
     assert response.status_code == 200
@@ -35,7 +35,7 @@ def test_update_category(category, categories_api):
 
     data = get_category_response.json()
 
-    assert data['name'] == 'Updated Phones'
+    assert data['name'] == 'updated Phones'
     assert data['slug'] == 'updated-phones'
 
 
@@ -78,7 +78,7 @@ def test_delete_missing_category(categories_api):
     assert response.status_code == 404
 
     data = response.json()
-    assert data["detail"] == f"Category with id '{MISSING_CATEGORY_ID}' not found."
+    assert data['detail'] == f"Category with id '{MISSING_CATEGORY_ID}' not found."
 
 
 def test_delete_category_with_products(category, product, categories_api):

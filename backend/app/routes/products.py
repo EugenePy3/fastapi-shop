@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
-from ..dependencies import require_admin, DBManagerDep, AdminUserDep
-from ..models.user import User
+from ..dependencies import DBManagerDep, AdminUserDep
 from ..services.product_service import ProductService
 from ..schemas.product import ProductResponse, ProductListResponse, ProductCreate, ProductUpdate
 

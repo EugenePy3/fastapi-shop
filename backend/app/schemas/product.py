@@ -13,7 +13,6 @@ class ProductBase(BaseModel):
         default=None,
         description='Product description'
     )
-
     price: PositivePrice = Field(description='Product price')
     category_id: int = Field(description='Category ID')
     image_url: str | None = Field(

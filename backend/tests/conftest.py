@@ -94,13 +94,15 @@ def user_data():
 
 @pytest.fixture
 def registered_user(auth_api, user_data):
-    auth_api.register(**user_data)
+    response = auth_api.register(**user_data)
+    assert response.status_code == 201
     return user_data
 
 
 @pytest.fixture
 def authenticated_api(auth_api, registered_user):
-    auth_api.login(**registered_user)
+    response = auth_api.login(**registered_user)
+    assert response.status_code == 200
     return auth_api
 
 

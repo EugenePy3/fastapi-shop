@@ -35,7 +35,7 @@ async def get_my_orders(
     return OrderListResponse(orders=to_order_list_response(orders))
 
 
-@router.get('/{order_id}/status', response_model=OrderResponse, status_code=status.HTTP_200_OK)
+@router.get('/{order_id}', response_model=OrderResponse, status_code=status.HTTP_200_OK)
 async def get_order(
         order_id: int,
         db: DBManagerDep,

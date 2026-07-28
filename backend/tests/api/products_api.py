@@ -25,7 +25,7 @@ class ProductsApi:
 
     def update(self, product_id, name, description, price, category_id, image_url):
         return self.client.patch(
-            f'/api/products{product_id}',
+            f'/api/products/{product_id}',
             json={
                 'name': name,
                 'description': description,
