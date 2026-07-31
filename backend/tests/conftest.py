@@ -1,3 +1,4 @@
+from decimal import Decimal
 from pathlib import Path
 import subprocess
 
@@ -13,6 +14,7 @@ from app.core.db_manager import DBManager
 
 from tests.api.auth_api import AuthApi
 from tests.api.cart_api import CartApi
+from tests.api.orders_api import OrdersApi
 from tests.api.products_api import ProductsApi
 
 from tests.database import (
@@ -134,6 +136,38 @@ def categories_api(admin_api):
 @pytest.fixture
 def products_api(admin_api):
     return ProductsApi(admin_api.client)
+
+
+@pytest.fixture
+def admin_orders_api(admin_api):
+    return OrdersApi(admin_api.client)
+
+
+@pytest.fixture
+def orders_api(authenticated_api):
+    return OrdersApi(authenticated_api.client)
+
+
+@pytest.fixture
+def cart_item(cart_api, product):
+    quantity = 3
+
+    cart_api.add(product["id"], quantity=quantity)
+
+    return {
+        "product_id": product["id"],
+        "product_name": product["name"],
+        "product_price": Decimal(product["price"]),
+        "quantity": quantity,
+        "subtotal": Decimal(product["price"]) * quantity,
+    }
+
+
+@pytest.fixture
+def order(orders_api, cart_item):
+    response = orders_api.create()
+    assert response.status_code == 201
+    return response.json()
 
 
 @pytest.fixture

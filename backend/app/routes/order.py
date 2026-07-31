@@ -9,8 +9,8 @@ from ..schemas.order import OrderResponse, OrderListResponse, OrderStatusUpdate
 from ..services.order_service import OrderService
 
 router = APIRouter(
-    prefix='/api/order',
-    tags=['order']
+    prefix='/api/orders',
+    tags=['orders']
 )
 
 
