@@ -24,6 +24,9 @@ from tests.database import (
 
 from app.models.user import User
 
+# ============================================================
+# Infrastructure
+# ============================================================
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
@@ -66,8 +69,13 @@ async def override_get_db_manager():
         yield manager
 
 
+# ============================================================
+# HTTP clients
+# ============================================================
+
+
 @pytest.fixture
-def client():
+def user_client():
     app.dependency_overrides[get_db_manager] = override_get_db_manager
 
     with TestClient(app) as client:
@@ -77,13 +85,33 @@ def client():
 
 
 @pytest.fixture
-def auth_api(client):
-    return AuthApi(client)
+def admin_client():
+    app.dependency_overrides[get_db_manager] = override_get_db_manager
+
+    with TestClient(app) as client:
+        yield client
+
+    app.dependency_overrides.clear()
+
+
+# ============================================================
+# API wrappers
+# ============================================================
 
 
 @pytest.fixture
-def cart_api(authenticated_api):
-    return CartApi(authenticated_api.client)
+def auth_api(user_client):
+    return AuthApi(user_client)
+
+
+@pytest.fixture
+def admin_auth_api(admin_client):
+    return AuthApi(admin_client)
+
+
+# ============================================================
+# Test users
+# ============================================================
 
 
 @pytest.fixture
@@ -95,7 +123,20 @@ def user_data():
 
 
 @pytest.fixture
-def registered_user(auth_api, user_data):
+def admin_user_data():
+    return {
+        'name': 'Admin',
+        'password': '12345678',
+    }
+
+
+# ============================================================
+# Regular user
+# ============================================================
+
+
+@pytest.fixture
+async def registered_user(auth_api, user_data):
     response = auth_api.register(**user_data)
     assert response.status_code == 201
     return user_data
@@ -108,24 +149,56 @@ def authenticated_api(auth_api, registered_user):
     return auth_api
 
 
+# ============================================================
+# Administrator
+# ============================================================
+
+
 @pytest.fixture
-async def admin_user(registered_user):
+async def registered_admin(admin_auth_api, admin_user_data):
+    response = admin_auth_api.register(**admin_user_data)
+    assert response.status_code == 201
+
     async with TestSessionLocal() as session:
         await session.execute(
             update(User)
-            .where(User.name == registered_user['name'])
+            .where(User.name == admin_user_data['name'])
             .values(is_admin=True)
         )
         await session.commit()
 
-    return registered_user
+    return admin_user_data
 
 
 @pytest.fixture
-def admin_api(auth_api, admin_user):
-    response = auth_api.login(**admin_user)
+def admin_api(admin_auth_api, registered_admin):
+    response = admin_auth_api.login(**registered_admin)
     assert response.status_code == 200
-    return auth_api
+    return admin_auth_api
+
+
+# ============================================================
+# Domain API
+# ============================================================
+
+@pytest.fixture
+def cart_api(authenticated_api):
+    return CartApi(authenticated_api.client)
+
+
+@pytest.fixture
+def orders_api(authenticated_api):
+    return OrdersApi(authenticated_api.client)
+
+
+@pytest.fixture
+def admin_cart_api(admin_api):
+    return CartApi(admin_api.client)
+
+
+@pytest.fixture
+def admin_orders_api(admin_api):
+    return OrdersApi(admin_api.client)
 
 
 @pytest.fixture
@@ -138,36 +211,9 @@ def products_api(admin_api):
     return ProductsApi(admin_api.client)
 
 
-@pytest.fixture
-def admin_orders_api(admin_api):
-    return OrdersApi(admin_api.client)
-
-
-@pytest.fixture
-def orders_api(authenticated_api):
-    return OrdersApi(authenticated_api.client)
-
-
-@pytest.fixture
-def cart_item(cart_api, product):
-    quantity = 3
-
-    cart_api.add(product["id"], quantity=quantity)
-
-    return {
-        "product_id": product["id"],
-        "product_name": product["name"],
-        "product_price": Decimal(product["price"]),
-        "quantity": quantity,
-        "subtotal": Decimal(product["price"]) * quantity,
-    }
-
-
-@pytest.fixture
-def order(orders_api, cart_item):
-    response = orders_api.create()
-    assert response.status_code == 201
-    return response.json()
+# ============================================================
+# Domain entities
+# ============================================================
 
 
 @pytest.fixture
@@ -193,3 +239,35 @@ def product(products_api, category):
     return response.json()
 
 
+@pytest.fixture
+def admin_cart_with_product(admin_cart_api, product):
+    admin_cart_api.add(product['id'], quantity=1)
+
+
+@pytest.fixture
+def admin_order(admin_orders_api, admin_cart_with_product):
+    response = admin_orders_api.create()
+    assert response.status_code == 201
+    return response.json()
+
+
+@pytest.fixture
+def cart_with_product(cart_api, product):
+    quantity = 3
+
+    cart_api.add(product["id"], quantity=quantity)
+
+    return {
+        "product_id": product["id"],
+        "product_name": product["name"],
+        "product_price": Decimal(product["price"]),
+        "quantity": quantity,
+        "subtotal": Decimal(product["price"]) * quantity,
+    }
+
+
+@pytest.fixture
+def order(orders_api, cart_with_product):
+    response = orders_api.create()
+    assert response.status_code == 201
+    return response.json()
